@@ -3,6 +3,7 @@ from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.advideo import AdVideo
+from facebook_business.adobjects.adcreative import AdCreative
 from facebook_business.adobjects.adsinsights import AdsInsights
 import pandas as pd
 from datetime import date, timedelta
@@ -101,13 +102,6 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
     object-fit: cover;
     display: block;
 }
-.media-wrap .zoom-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0);
-    transition: background 0.2s;
-    cursor: zoom-in;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -187,37 +181,51 @@ if st.button("📊 데이터 불러오기"):
                 try:
                     ad = Ad(ad_id)
                     ad_data = ad.api_get(fields=[
-                        "creative{image_url,thumbnail_url,object_story_spec,video_id}",
                         "effective_status",
                         "start_time",
                         "stop_time",
+                        "creative",
                     ])
                     status = ad_data.get("effective_status", "알 수 없음")
                     start_time = str(ad_data.get("start_time", ""))[:10]
                     stop_time = str(ad_data.get("stop_time", ""))[:10]
 
-                    creative = ad_data.get("creative", {})
-                    spec = creative.get("object_story_spec", {})
-                    video_data = spec.get("video_data", {})
-                    link_data = spec.get("link_data", {})
+                    creative_ref = ad_data.get("creative", {})
+                    creative_id = creative_ref.get("id", "")
 
-                    if video_data:
-                        is_video = True
-                        thumbnail_url = video_data.get("image_url", "") or creative.get("thumbnail_url", "")
-                        video_id = video_data.get("video_id") or creative.get("video_id")
-                        if video_id:
-                            try:
-                                vid = AdVideo(video_id)
-                                vid_data = vid.api_get(fields=["source"])
-                                video_url = vid_data.get("source", "")
-                            except Exception:
-                                pass
-                    else:
-                        thumbnail_url = (
-                            link_data.get("picture") or
-                            creative.get("image_url") or
-                            creative.get("thumbnail_url", "")
-                        )
+                    if creative_id:
+                        creative_obj = AdCreative(creative_id)
+                        creative_data = creative_obj.api_get(fields=[
+                            "thumbnail_url",
+                            "image_url",
+                            "object_story_spec",
+                            "video_id",
+                        ])
+
+                        spec = creative_data.get("object_story_spec", {})
+                        video_data = spec.get("video_data", {})
+                        link_data = spec.get("link_data", {})
+
+                        if video_data:
+                            is_video = True
+                            thumbnail_url = (
+                                video_data.get("image_url", "") or
+                                creative_data.get("thumbnail_url", "")
+                            )
+                            video_id = video_data.get("video_id") or creative_data.get("video_id")
+                            if video_id:
+                                try:
+                                    vid = AdVideo(video_id)
+                                    vid_data = vid.api_get(fields=["source"])
+                                    video_url = vid_data.get("source", "")
+                                except Exception:
+                                    pass
+                        else:
+                            thumbnail_url = (
+                                link_data.get("picture") or
+                                creative_data.get("image_url") or
+                                creative_data.get("thumbnail_url", "")
+                            )
                 except Exception:
                     pass
 
@@ -250,6 +258,7 @@ if st.session_state.df is not None:
     total_purchases = df["구매전환"].sum()
     total_conv_value = df["구매전환금액"].sum()
     overall_roas = round(total_conv_value / total_spend, 2) if total_spend > 0 else 0
+    overall_roas_pct = f"{overall_roas * 100:.0f}%"
 
     m1, m2, m3, m4 = st.columns(4)
     with m1:
@@ -257,7 +266,7 @@ if st.session_state.df is not None:
     with m2:
         st.markdown(f'<div class="metric-card"><div class="metric-label">🛒 총 구매전환</div><div class="metric-value">{total_purchases:,}건</div></div>', unsafe_allow_html=True)
     with m3:
-        st.markdown(f'<div class="metric-card"><div class="metric-label">📈 전체 ROAS</div><div class="metric-value">{overall_roas}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card"><div class="metric-label">📈 전체 ROAS</div><div class="metric-value">{overall_roas_pct}</div></div>', unsafe_allow_html=True)
     with m4:
         st.markdown(f'<div class="metric-card"><div class="metric-label">💵 총 전환금액</div><div class="metric-value">{total_conv_value:,.0f}원</div></div>', unsafe_allow_html=True)
 
@@ -300,7 +309,8 @@ if st.session_state.df is not None:
   </video>
 </div>'''
         elif row["썸네일"]:
-            return f'<div class="media-wrap"><img src="{row["썸네일"]}" /></div>'
+            img_url = row["썸네일"]
+            return f'<div class="media-wrap"><img src="{img_url}" loading="lazy" /></div>'
         return '<div class="media-wrap" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:0.8rem;">No Image</div>'
 
     def render_ads(df_render):
@@ -313,6 +323,7 @@ if st.session_state.df is not None:
             rc = roas_class(row["ROAS"])
             sb = status_badge(row["상태"])
             media = media_html(row)
+            roas_pct = f"{row['ROAS'] * 100:.0f}%"
 
             st.markdown(f"""
 <div class="ad-card">
@@ -330,7 +341,7 @@ if st.session_state.df is not None:
         <div><div style="color:#888;font-size:0.75rem;">비용</div><div style="font-weight:600;">{row['비용']:,.0f}원</div></div>
         <div><div style="color:#888;font-size:0.75rem;">구매전환</div><div style="font-weight:600;">{row['구매전환']}건</div></div>
         <div><div style="color:#888;font-size:0.75rem;">전환금액</div><div style="font-weight:600;">{row['구매전환금액']:,.0f}원</div></div>
-        <div><div style="color:#888;font-size:0.75rem;">ROAS</div><div class="{rc}">{row['ROAS']}</div></div>
+        <div><div style="color:#888;font-size:0.75rem;">ROAS</div><div class="{rc}">{roas_pct}</div></div>
         <div><div style="color:#888;font-size:0.75rem;">CTR</div><div style="font-weight:600;">{row['CTR(%)']}%</div></div>
         <div><div style="color:#888;font-size:0.75rem;">CPC</div><div style="font-weight:600;">{row['CPC']:,.0f}원</div></div>
         <div><div style="color:#888;font-size:0.75rem;">노출수</div><div style="font-weight:600;">{row['노출수']:,}</div></div>
