@@ -6,10 +6,10 @@ from facebook_business.adobjects.adsinsights import AdsInsights
 import pandas as pd
 from datetime import date, timedelta
 
-ACCESS_TOKEN = "EAAcmPZC5jBgsBRQnTgZAn6cCIw9v9Q01ue1S757AKG0rTOdfzTHG6PzpfjF44EYL2tR9fxv5PqZBZBoT6jVPwHpQHZBZB0RgjM779Oh5IuN11PLgEgmwWoN4B5xowEfMGXQA5KUjQN3RzUSU79TKeKVf6aSZAgPGuFJw4SwZAZBN2EyQANZA645QvfJiVcIZB4QCn5zEVKA2mKKtnmZCViComs5Gk78STWZBVbA6iFpPWLfp18JDkCIoVy1UAjXtqxFFh8aIOFZCiiccQdueTZAIE4jB05R"
-AD_ACCOUNT_ID = "act_327926766950667"
-APP_ID = "20123811296722203"
-APP_SECRET = "cc748336fa0240542f986e1d3602b692"
+ACCESS_TOKEN = st.secrets["ACCESS_TOKEN"]
+AD_ACCOUNT_ID = st.secrets["AD_ACCOUNT_ID"]
+APP_ID = st.secrets["APP_ID"]
+APP_SECRET = st.secrets["APP_SECRET"]
 
 st.set_page_config(page_title="LLS AD Dashboard", page_icon="📊", layout="wide")
 
