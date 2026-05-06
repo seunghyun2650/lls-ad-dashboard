@@ -162,12 +162,11 @@ if st.button("📊 데이터 불러오기"):
                 ad_id = data.get("ad_id", "")
                 purchases = 0
                 purchase_value = 0.0
-                PURCHASE_TYPES = {"purchase", "offsite_conversion.fb_pixel_purchase"}
                 for action in data.get("actions", []):
-                    if action["action_type"] in PURCHASE_TYPES:
+                    if action["action_type"] == "offsite_conversion.fb_pixel_purchase":
                         purchases += int(float(action["value"]))
                 for action in data.get("action_values", []):
-                    if action["action_type"] in PURCHASE_TYPES:
+                    if action["action_type"] == "offsite_conversion.fb_pixel_purchase":
                         purchase_value += float(action["value"])
                 roas = round(purchase_value / spend, 2) if spend > 0 else 0
 
@@ -352,6 +351,10 @@ if st.session_state.df is not None:
 """, unsafe_allow_html=True)
 
     render_ads(df_sorted)
+
+    with st.expander("🔍 이미지 디버그 (이미지 안 뜰 때 확인용)"):
+        debug_df = df[["광고명", "썸네일", "영상여부", "영상URL", "상태"]].head(10)
+        st.dataframe(debug_df)
 
     st.markdown("---")
     st.subheader("🏆 베스트 소재 TOP 5 (ROAS 기준)")
