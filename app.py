@@ -2,7 +2,6 @@ import streamlit as st
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.ad import Ad
-from facebook_business.adobjects.advideo import AdVideo
 from facebook_business.adobjects.adcreative import AdCreative
 from facebook_business.adobjects.adsinsights import AdsInsights
 import pandas as pd
@@ -80,28 +79,23 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
 
 .media-wrap {
     position: relative;
-    width: 240px;
-    height: 135px;
+    width: 160px;
+    height: 284px;
     border-radius: 10px;
     overflow: hidden;
     flex-shrink: 0;
-    background: #f5f5f5;
+    background: #f0f0f0;
+    cursor: zoom-in;
 }
 .media-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.25s ease;
-    cursor: zoom-in;
+    transition: transform 0.35s ease;
 }
-.media-wrap img:hover { transform: scale(1.05); }
-.media-wrap video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
+.media-wrap img:hover { transform: scale(1.12); }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -137,6 +131,7 @@ if st.button("📊 데이터 불러오기"):
             fields = [
                 AdsInsights.Field.ad_id,
                 AdsInsights.Field.ad_name,
+                AdsInsights.Field.adset_id,
                 AdsInsights.Field.adset_name,
                 AdsInsights.Field.spend,
                 AdsInsights.Field.impressions,
@@ -152,6 +147,39 @@ if st.button("📊 데이터 불러오기"):
                 "limit": 500,
             }
             insights = account.get_insights(fields=fields, params=params)
+
+            # 광고세트 날짜 일괄 조회
+            from facebook_business.adobjects.adset import AdSet
+            adset_cache = {}
+            try:
+                adsets_cursor = account.get_ad_sets(fields=[
+                    "id", "start_time", "end_time"
+                ], params={"limit": 500})
+                for adset_item in adsets_cursor:
+                    d = dict(adset_item)
+                    adset_cache[d.get("id", "")] = d
+            except Exception:
+                pass
+
+            # 광고 크리에이티브 일괄 조회
+            ad_cache = {}
+            ad_cache_error = ""
+            try:
+                ads_cursor = account.get_ads(fields=[
+                    "id", "effective_status", "created_time",
+                    "creative{thumbnail_url,image_url,video_id}",
+                ], params={"limit": 200})
+                for ad_item in ads_cursor:
+                    d = dict(ad_item)
+                    ad_cache[d.get("id", "")] = d
+            except Exception as e:
+                ad_cache_error = str(e)
+            st.session_state.ad_cache_debug = {
+                "count": len(ad_cache),
+                "error": ad_cache_error,
+                "sample": dict(list(ad_cache.values())[0]) if ad_cache else {},
+            }
+
             rows = []
             for insight in insights:
                 data = dict(insight)
@@ -177,56 +205,24 @@ if st.button("📊 데이터 불러오기"):
                 start_time = ""
                 stop_time = ""
 
-                try:
-                    ad = Ad(ad_id)
-                    ad_data = ad.api_get(fields=[
-                        "effective_status",
-                        "start_time",
-                        "stop_time",
-                        "creative",
-                    ])
-                    status = ad_data.get("effective_status", "알 수 없음")
-                    start_time = str(ad_data.get("start_time", ""))[:10]
-                    stop_time = str(ad_data.get("stop_time", ""))[:10]
+                ad_info_pre = ad_cache.get(ad_id, {})
+                if ad_info_pre:
+                    start_time = str(ad_info_pre.get("created_time", ""))[:10]
 
-                    creative_ref = ad_data.get("creative", {})
-                    creative_id = creative_ref.get("id", "")
+                ad_info = ad_cache.get(ad_id, {})
+                if ad_info:
+                    status = ad_info.get("effective_status", "알 수 없음")
+                    creative = ad_info.get("creative", {})
+                    video_id = creative.get("video_id", "")
 
-                    if creative_id:
-                        creative_obj = AdCreative(creative_id)
-                        creative_data = creative_obj.api_get(fields=[
-                            "thumbnail_url",
-                            "image_url",
-                            "object_story_spec",
-                            "video_id",
-                        ])
-
-                        spec = creative_data.get("object_story_spec", {})
-                        video_data = spec.get("video_data", {})
-                        link_data = spec.get("link_data", {})
-
-                        if video_data:
-                            is_video = True
-                            thumbnail_url = (
-                                video_data.get("image_url", "") or
-                                creative_data.get("thumbnail_url", "")
-                            )
-                            video_id = video_data.get("video_id") or creative_data.get("video_id")
-                            if video_id:
-                                try:
-                                    vid = AdVideo(video_id)
-                                    vid_data = vid.api_get(fields=["source"])
-                                    video_url = vid_data.get("source", "")
-                                except Exception:
-                                    pass
-                        else:
-                            thumbnail_url = (
-                                link_data.get("picture") or
-                                creative_data.get("image_url") or
-                                creative_data.get("thumbnail_url", "")
-                            )
-                except Exception:
-                    pass
+                    if video_id:
+                        is_video = True
+                        thumbnail_url = creative.get("thumbnail_url", "")
+                    else:
+                        thumbnail_url = (
+                            creative.get("image_url") or
+                            creative.get("thumbnail_url", "")
+                        )
 
                 rows.append({
                     "썸네일": thumbnail_url,
@@ -298,26 +294,15 @@ if st.session_state.df is not None:
         return f'<span class="badge-paused">{s}</span>'
 
     def media_html(row):
-        if row["영상여부"] and row["영상URL"]:
-            thumb = row["썸네일"]
-            src = row["영상URL"]
-            return f'''<div class="media-wrap">
-  <video poster="{thumb}" muted loop preload="none"
-    onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0;">
-    <source src="{src}">
-  </video>
-</div>'''
-        elif row["썸네일"]:
-            img_url = row["썸네일"]
-            return f'<div class="media-wrap"><img src="{img_url}" loading="lazy" /></div>'
-        return '<div class="media-wrap" style="display:flex;align-items:center;justify-content:center;color:#ccc;font-size:0.8rem;">No Image</div>'
+        thumb_url = row["썸네일"]
+        if not thumb_url:
+            label = "🎬 영상 소재" if row["영상여부"] else "No Image"
+            return f'<div class="media-wrap" style="display:flex;align-items:center;justify-content:center;color:#aaa;font-size:0.8rem;background:#f5f5f5;">{label}</div>'
+        return f'<div class="media-wrap"><img src="{thumb_url}" /></div>'
 
     def render_ads(df_render):
         for _, row in df_render.iterrows():
-            date_range = ""
-            if row["시작일"]:
-                date_range = row["시작일"]
-                date_range += f" ~ {row['종료일']}" if row["종료일"] else " ~ 진행중"
+            date_range = row["시작일"] if row["시작일"] else ""
 
             rc = roas_class(row["ROAS"])
             sb = status_badge(row["상태"])
@@ -334,7 +319,7 @@ if st.session_state.df is not None:
         {sb}
       </div>
       <div style="color:#888;font-size:0.8rem;margin-bottom:0.8rem;">
-        📅 {date_range if date_range else '날짜 정보 없음'} &nbsp;|&nbsp; {row['광고세트']}
+        📅 생성일 {date_range if date_range else '정보 없음'} &nbsp;|&nbsp; {row['광고세트']}
       </div>
       <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
         <div><div style="color:#888;font-size:0.75rem;">비용</div><div style="font-weight:600;">{row['비용']:,.0f}원</div></div>
@@ -352,9 +337,16 @@ if st.session_state.df is not None:
 
     render_ads(df_sorted)
 
-    with st.expander("🔍 이미지 디버그 (이미지 안 뜰 때 확인용)"):
-        debug_df = df[["광고명", "썸네일", "영상여부", "영상URL", "상태"]].head(10)
+    with st.expander("🔍 이미지 디버그"):
+        debug_df = df[["광고명", "썸네일", "영상여부", "영상URL", "상태"]].head(5)
         st.dataframe(debug_df)
+        if "ad_cache_debug" in st.session_state:
+            dbg = st.session_state.ad_cache_debug
+            st.write(f"캐시된 광고 수: {dbg['count']}개")
+            if dbg["error"]:
+                st.error(f"캐시 오류: {dbg['error']}")
+            if dbg["sample"]:
+                st.json(dbg["sample"])
 
     st.markdown("---")
     st.subheader("🏆 베스트 소재 TOP 5 (ROAS 기준)")
