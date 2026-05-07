@@ -121,7 +121,7 @@ with col2:
 if "df" not in st.session_state:
     st.session_state.df = None
 if "sort_by" not in st.session_state:
-    st.session_state.sort_by = "ROAS"
+    st.session_state.sort_by = "구매전환"
 
 if st.button("📊 데이터 불러오기"):
     with st.spinner("Meta API에서 데이터 가져오는 중..."):
@@ -240,6 +240,8 @@ if st.button("📊 데이터 불러오기"):
                     "CTR(%)": round(ctr, 2),
                     "CPC": round(cpc, 2),
                     "노출수": impressions,
+                    "CVR(%)": round(purchases / int(data.get("clicks", 1)) * 100, 2) if int(data.get("clicks", 0)) > 0 else 0,
+                    "구매당비용": round(spend / purchases, 0) if purchases > 0 else 0,
                 })
             st.session_state.df = pd.DataFrame(rows)
             st.success(f"총 {len(rows)}개 소재 로드 완료!")
@@ -270,17 +272,23 @@ if st.session_state.df is not None:
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        if st.button("ROAS 높은순"): st.session_state.sort_by = "ROAS"
-    with c2:
         if st.button("구매전환 높은순"): st.session_state.sort_by = "구매전환"
+    with c2:
+        if st.button("ROAS 높은순"): st.session_state.sort_by = "ROAS"
     with c3:
-        if st.button("CPC 낮은순"): st.session_state.sort_by = "CPC_asc"
+        if st.button("CVR 높은순"): st.session_state.sort_by = "CVR(%)"
     with c4:
-        if st.button("CTR 높은순"): st.session_state.sort_by = "CTR(%)"
+        if st.button("구매당 비용 낮은순"): st.session_state.sort_by = "구매당비용_asc"
 
-    st.caption(f"현재 정렬: **{st.session_state.sort_by.replace('_asc', '')}**")
-    ascending = st.session_state.sort_by == "CPC_asc"
-    sort_col = "CPC" if st.session_state.sort_by == "CPC_asc" else st.session_state.sort_by
+    sort_label_map = {
+        "구매전환": "구매전환 높은순",
+        "ROAS": "ROAS 높은순",
+        "CVR(%)": "CVR 높은순",
+        "구매당비용_asc": "구매당 비용 낮은순",
+    }
+    st.caption(f"현재 정렬: **{sort_label_map.get(st.session_state.sort_by, st.session_state.sort_by)}**")
+    ascending = st.session_state.sort_by == "구매당비용_asc"
+    sort_col = "구매당비용" if st.session_state.sort_by == "구매당비용_asc" else st.session_state.sort_by
     df_sorted = df.sort_values(sort_col, ascending=ascending).reset_index(drop=True)
 
     def roas_class(r):
@@ -326,6 +334,8 @@ if st.session_state.df is not None:
         <div><div style="color:#888;font-size:0.75rem;">구매전환</div><div style="font-weight:600;">{row['구매전환']}건</div></div>
         <div><div style="color:#888;font-size:0.75rem;">전환금액</div><div style="font-weight:600;">{row['구매전환금액']:,.0f}원</div></div>
         <div><div style="color:#888;font-size:0.75rem;">ROAS</div><div class="{rc}">{roas_pct}</div></div>
+        <div><div style="color:#888;font-size:0.75rem;">CVR</div><div style="font-weight:600;">{row['CVR(%)']}%</div></div>
+        <div><div style="color:#888;font-size:0.75rem;">구매당비용</div><div style="font-weight:600;">{row['구매당비용']:,.0f}원</div></div>
         <div><div style="color:#888;font-size:0.75rem;">CTR</div><div style="font-weight:600;">{row['CTR(%)']}%</div></div>
         <div><div style="color:#888;font-size:0.75rem;">CPC</div><div style="font-weight:600;">{row['CPC']:,.0f}원</div></div>
         <div><div style="color:#888;font-size:0.75rem;">노출수</div><div style="font-weight:600;">{row['노출수']:,}</div></div>
