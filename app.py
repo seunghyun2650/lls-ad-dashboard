@@ -110,6 +110,7 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
     cursor: zoom-in;
     overflow: visible;
     z-index: 1;
+    isolation: isolate;
 }
 .media-wrap img {
     width: 100%;
@@ -117,14 +118,24 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
     object-fit: cover;
     display: block;
     border-radius: 10px;
-    transition: transform 0.35s ease, box-shadow 0.35s ease, z-index 0s;
+    transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.35s ease;
     position: relative;
     z-index: 1;
+    transform-origin: left center;
 }
 .media-wrap img:hover {
-    transform: scale(2.2);
+    transform: scale(2.5);
     z-index: 9999;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+    border-radius: 10px;
+}
+.media-wrap a img {
+    transform-origin: left center;
+}
+.media-wrap a img:hover {
+    transform: scale(2.5);
+    z-index: 9999;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.45);
 }
 
 </style>
@@ -340,8 +351,8 @@ if st.session_state.df is not None:
             thumb = f"https://img.youtube.com/vi/{yt_id}/hqdefault.jpg"
             yt_url = f"https://youtube.com/shorts/{yt_id}"
             return f'''<a href="{yt_url}" target="_blank" style="display:block;text-decoration:none;">
-  <div class="media-wrap" style="cursor:pointer;">
-    <img src="{thumb}" />
+  <div class="media-wrap" style="cursor:pointer;background:#111;">
+    <img src="{thumb}" style="object-fit:contain;background:#111;" />
     <div style="position:absolute;bottom:6px;right:6px;background:rgba(200,0,0,0.85);color:white;font-size:0.65rem;padding:2px 7px;border-radius:4px;font-weight:700;">▶ YouTube</div>
   </div>
 </a>'''
