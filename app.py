@@ -379,8 +379,8 @@ with col4:
     force_refresh = st.checkbox("🔄 최신 데이터로 새로고침", value=False)
     st.markdown("""
     <p style="font-size:0.7rem;color:#a1a1aa;margin:0.2rem 0 0 1.6rem;line-height:1.5;">
-        체크 후 불러오기 → Meta에서 최신 데이터 재조회<br>
-        미체크 시 같은 날짜면 저장된 데이터 사용 (빠름)
+        광고를 새로 추가했거나 데이터가 바뀐 경우 체크하세요<br>
+        평소엔 체크 없이 불러오면 더 빠르게 조회됩니다
     </p>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
