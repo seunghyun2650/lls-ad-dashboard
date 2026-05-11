@@ -348,11 +348,12 @@ if st.session_state.df is not None:
         yt_id = get_youtube_id(ad_name)
 
         if yt_id:
-            thumb = f"https://img.youtube.com/vi/{yt_id}/hqdefault.jpg"
+            thumb = f"https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg"
+            thumb_fallback = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
             yt_url = f"https://youtube.com/shorts/{yt_id}"
             return f'''<a href="{yt_url}" target="_blank" style="display:block;text-decoration:none;">
   <div class="media-wrap" style="cursor:pointer;background:#111;">
-    <img src="{thumb}" style="object-fit:contain;background:#111;" />
+    <img src="{thumb}" style="object-fit:cover;" onerror="this.src='{thumb_fallback}'" />
     <div style="position:absolute;bottom:6px;right:6px;background:rgba(200,0,0,0.85);color:white;font-size:0.65rem;padding:2px 7px;border-radius:4px;font-weight:700;">▶ YouTube</div>
   </div>
 </a>'''
