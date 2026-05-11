@@ -544,22 +544,39 @@ if st.session_state.df is not None:
         return "kv-red"
 
     def thumb_html(row):
-        """그리드 카드용 썸네일 HTML (thumb-area 안의 내용물)"""
+        """그리드 카드용 썸네일 HTML — (height_px, inner_html) 튜플 반환"""
         ad_name = row["광고명"]
         yt_id = get_youtube_id(ad_name)
+
         if yt_id:
+            # YouTube: 가로형 썸네일 → 낮은 컨테이너 + cover
             thumb    = f"https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg"
             fallback = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
             yt_url   = f"https://youtube.com/shorts/{yt_id}"
-            return f'''<a href="{yt_url}" target="_blank" style="display:block;height:100%;">
-  <img src="{thumb}" onerror="this.src='{fallback}'" />
+            inner = f'''<a href="{yt_url}" target="_blank" style="display:block;height:100%;">
+  <img src="{thumb}" onerror="this.src='{fallback}'"
+       style="width:100%;height:100%;object-fit:cover;display:block;" />
   <span class="yt-badge">▶ YouTube</span>
 </a>'''
+            return 190, inner
+
         url = row["썸네일"]
         if url:
-            return f'<img src="{url}" />'
+            # 이미지형: 블러 배경 + 원본 contain
+            # → 세로 이미지가 잘리지 않고 전체가 보임
+            inner = f'''
+<div style="position:absolute;inset:-20px;
+            background-image:url('{url}');
+            background-size:cover;background-position:center;
+            filter:blur(20px);opacity:0.5;transform:scale(1.1);"></div>
+<img src="{url}"
+     style="position:relative;z-index:1;
+            width:100%;height:100%;
+            object-fit:contain;display:block;" />'''
+            return 260, inner
+
         label = "🎬 영상 소재" if row["영상여부"] else "이미지 없음"
-        return f'<div class="thumb-no-img">{label}</div>'
+        return 190, f'<div class="thumb-no-img">{label}</div>'
 
     def render_grid(df_render, show_rank=False):
         cards = ""
@@ -575,10 +592,12 @@ if st.session_state.df is not None:
 
             date_txt = f'📅 {row["시작일"]}' if row["시작일"] else ""
 
+            thumb_h, thumb_inner = thumb_html(row)
+
             cards += f"""
 <div class="ad-card-g">
-  <div class="thumb-area">
-    {thumb_html(row)}
+  <div class="thumb-area" style="height:{thumb_h}px;">
+    {thumb_inner}
     <span class="status-pill {sp_cls}">{sp_text}</span>
     {rank_badge}
   </div>
