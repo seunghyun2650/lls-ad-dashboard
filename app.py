@@ -291,11 +291,21 @@ header[data-testid="stHeader"] { background: transparent !important; }
     text-align: center;
     border: 1px solid #f0f0f0;
 }
+.kpi-box-active {
+    background: #f0f9ff;
+    border: 1.5px solid #bae6fd;
+}
 .kpi-lbl {
     font-size: 0.6rem;
     color: #a1a1aa;
     margin-bottom: 0.15rem;
     font-weight: 500;
+}
+.kpi-lbl-active {
+    font-size: 0.6rem;
+    color: #0284c7;
+    margin-bottom: 0.15rem;
+    font-weight: 700;
 }
 .kpi-val {
     font-size: 0.82rem;
@@ -580,7 +590,34 @@ if st.session_state.df is not None:
         label = "🎬 영상 소재" if row["영상여부"] else "이미지 없음"
         return THUMB_H, f'<div class="thumb-no-img">{label}</div>'
 
-    def render_grid(df_render, show_rank=False):
+    def build_kpi_html(row, sort_by, roas_pct, rc, spend_per):
+        """정렬 기준에 따라 KPI 박스 3개를 동적으로 구성"""
+        all_kpis = {
+            "전환금액":  ("전환금액",  f"{row['구매전환금액']:,.0f}원", ""),
+            "ROAS":      ("ROAS",      roas_pct,                        rc),
+            "비용":      ("비용",      f"{row['비용']:,.0f}원",          ""),
+            "CVR":       ("CVR",       f"{row['CVR(%)']}%",             ""),
+            "구매당비용": ("구매당비용", spend_per,                       ""),
+        }
+        # 정렬 기준별 순서: 첫 번째가 핵심 지표
+        order_map = {
+            "구매전환금액":   ["전환금액", "ROAS", "비용"],
+            "ROAS":          ["ROAS",     "전환금액", "비용"],
+            "CVR(%)":        ["CVR",      "ROAS", "전환금액"],
+            "구매당비용_asc": ["구매당비용", "ROAS", "전환금액"],
+        }
+        keys = order_map.get(sort_by, ["ROAS", "전환금액", "비용"])
+        html = '<div class="kpi-row">'
+        for idx, key in enumerate(keys):
+            label, value, cls = all_kpis[key]
+            if idx == 0:
+                html += f'<div class="kpi-box kpi-box-active"><div class="kpi-lbl-active">{label}</div><div class="kpi-val {cls}">{value}</div></div>'
+            else:
+                html += f'<div class="kpi-box"><div class="kpi-lbl">{label}</div><div class="kpi-val {cls}">{value}</div></div>'
+        html += '</div>'
+        return html
+
+    def render_grid(df_render, show_rank=False, sort_by="구매전환금액"):
         cards = ""
         for i, (_, row) in enumerate(df_render.iterrows()):
             roas_pct = f"{row['ROAS']*100:.0f}%"
@@ -595,6 +632,7 @@ if st.session_state.df is not None:
             date_txt = f'📅 {row["시작일"]}' if row["시작일"] else ""
 
             thumb_h, thumb_inner = thumb_html(row)
+            kpi_html = build_kpi_html(row, sort_by, roas_pct, rc, spend_per)
 
             cards += f"""
 <div class="ad-card-g">
@@ -607,20 +645,7 @@ if st.session_state.df is not None:
     <div class="card-ad-name" title="{row['광고명']}">{row['광고명']}</div>
     <div class="card-adset" title="{row['광고세트']}">{row['광고세트']}</div>
     {f'<div class="card-date">{date_txt}</div>' if date_txt else ''}
-    <div class="kpi-row">
-      <div class="kpi-box">
-        <div class="kpi-lbl">ROAS</div>
-        <div class="kpi-val {rc}">{roas_pct}</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-lbl">전환금액</div>
-        <div class="kpi-val">{row['구매전환금액']:,.0f}원</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-lbl">비용</div>
-        <div class="kpi-val">{row['비용']:,.0f}원</div>
-      </div>
-    </div>
+    {kpi_html}
     <div class="card-tags">
       <span class="tag">구매 {row['구매전환']}건</span>
       <span class="tag">CVR {row['CVR(%)']}%</span>
@@ -633,12 +658,12 @@ if st.session_state.df is not None:
 
         st.markdown(f'<div class="ad-grid">{cards}</div>', unsafe_allow_html=True)
 
-    render_grid(df_sorted)
+    render_grid(df_sorted, sort_by=st.session_state.sort_by)
 
     # ── TOP 5 ──
     st.markdown("<div style='margin-top:2.5rem;'></div>", unsafe_allow_html=True)
     st.markdown('<p class="section-title">🏆 베스트 소재 TOP 5 <span style="font-size:0.75rem;color:#a1a1aa;font-weight:400;">ROAS 기준</span></p>', unsafe_allow_html=True)
-    render_grid(df.sort_values("ROAS", ascending=False).head(5).reset_index(drop=True), show_rank=True)
+    render_grid(df.sort_values("ROAS", ascending=False).head(5).reset_index(drop=True), show_rank=True, sort_by="ROAS")
 
     # ── 디버그 / CSV ──
     st.markdown("<div style='margin-top:1.5rem;'></div>", unsafe_allow_html=True)
