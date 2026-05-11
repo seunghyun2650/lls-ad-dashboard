@@ -393,7 +393,8 @@ if "sort_by" not in st.session_state:
 # ── 캐싱 함수 (날짜가 같으면 API 재호출 없음) ─────────────────
 @st.cache_data(show_spinner=False)
 def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app_id, app_secret):
-    """날짜 범위가 같으면 캐시된 데이터 반환, 다르면 API 새로 호출"""
+    """날짜 범위가 같으면 캐시된 데이터 반환, 다르면 API 새로 호출.
+    반환값은 순수 Python 기본 타입(list of dict)만 사용."""
     FacebookAdsApi.init(app_id, app_secret, access_token)
     account = AdAccount(ad_account_id)
 
@@ -417,35 +418,38 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
     }
     insights = account.get_insights(fields=fields, params=params)
 
-    # 광고 크리에이티브 일괄 조회
+    # 광고 크리에이티브 일괄 조회 (plain dict만 저장)
     ad_cache = {}
-    ad_cache_error = ""
     try:
         ads_cursor = account.get_ads(fields=[
             "id", "effective_status", "created_time",
             "creative{thumbnail_url,image_url,video_id}",
         ], params={"limit": 200})
         for ad_item in ads_cursor:
-            d = dict(ad_item)
-            ad_cache[d.get("id", "")] = d
-    except Exception as e:
-        ad_cache_error = str(e)
-
-    debug_info = {
-        "count": len(ad_cache),
-        "error": ad_cache_error,
-        "sample": dict(list(ad_cache.values())[0]) if ad_cache else {},
-    }
+            raw = dict(ad_item)
+            ad_id = str(raw.get("id", ""))
+            # creative 필드를 plain dict로 변환
+            creative_raw = raw.get("creative", {})
+            creative = dict(creative_raw) if creative_raw else {}
+            ad_cache[ad_id] = {
+                "effective_status": str(raw.get("effective_status", "")),
+                "created_time":     str(raw.get("created_time", "")),
+                "thumbnail_url":    str(creative.get("thumbnail_url", "")),
+                "image_url":        str(creative.get("image_url", "")),
+                "video_id":         str(creative.get("video_id", "")),
+            }
+    except Exception:
+        pass
 
     rows = []
     for insight in insights:
         data = dict(insight)
-        spend = float(data.get("spend", 0))
-        ctr = float(data.get("ctr", 0))
-        cpc = float(data.get("cpc", 0))
+        spend       = float(data.get("spend", 0))
+        ctr         = float(data.get("ctr", 0))
+        cpc         = float(data.get("cpc", 0))
         impressions = int(data.get("impressions", 0))
-        clicks = int(data.get("clicks", 0))
-        ad_id = data.get("ad_id", "")
+        clicks      = int(data.get("clicks", 0))
+        ad_id       = str(data.get("ad_id", ""))
         purchases = 0
         purchase_value = 0.0
         for action in data.get("actions", []):
@@ -454,48 +458,44 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
         for action in data.get("action_values", []):
             if action["action_type"] == "offsite_conversion.fb_pixel_purchase":
                 purchase_value += float(action["value"])
-        roas = round(purchase_value / spend, 2) if spend > 0 else 0
+        roas = round(purchase_value / spend, 2) if spend > 0 else 0.0
 
         thumbnail_url = ""
-        is_video = False
-        status = "알 수 없음"
-        start_time = ""
+        is_video      = False
+        status        = "알 수 없음"
+        start_time    = ""
 
         ad_info = ad_cache.get(ad_id, {})
         if ad_info:
-            status = ad_info.get("effective_status", "알 수 없음")
-            start_time = str(ad_info.get("created_time", ""))[:10]
-            creative = ad_info.get("creative", {})
-            video_id = creative.get("video_id", "")
-            if video_id:
-                is_video = True
-                thumbnail_url = creative.get("thumbnail_url", "")
+            status     = ad_info["effective_status"]
+            start_time = ad_info["created_time"][:10]
+            video_id   = ad_info["video_id"]
+            if video_id and video_id != "None":
+                is_video      = True
+                thumbnail_url = ad_info["thumbnail_url"]
             else:
-                thumbnail_url = (
-                    creative.get("image_url") or
-                    creative.get("thumbnail_url", "")
-                )
+                thumbnail_url = ad_info["image_url"] or ad_info["thumbnail_url"]
 
         rows.append({
-            "썸네일": thumbnail_url,
-            "영상여부": is_video,
-            "광고명": data.get("ad_name", ""),
-            "광고세트": data.get("adset_name", ""),
-            "상태": status,
-            "시작일": start_time,
-            "비용": spend,
-            "구매전환": purchases,
-            "구매전환금액": purchase_value,
-            "ROAS": roas,
-            "CTR(%)": round(ctr, 2),
-            "CPC": round(cpc, 2),
-            "노출수": impressions,
-            "클릭수": clicks,
-            "CVR(%)": round(purchases / clicks * 100, 2) if clicks > 0 else 0,
-            "구매당비용": round(spend / purchases, 0) if purchases > 0 else 999999999,
+            "썸네일":      thumbnail_url,
+            "영상여부":     is_video,
+            "광고명":      str(data.get("ad_name", "")),
+            "광고세트":     str(data.get("adset_name", "")),
+            "상태":        status,
+            "시작일":      start_time,
+            "비용":        spend,
+            "구매전환":     purchases,
+            "구매전환금액":  purchase_value,
+            "ROAS":        roas,
+            "CTR(%)":      round(ctr, 2),
+            "CPC":         round(cpc, 2),
+            "노출수":      impressions,
+            "클릭수":      clicks,
+            "CVR(%)":      round(purchases / clicks * 100, 2) if clicks > 0 else 0.0,
+            "구매당비용":   round(spend / purchases, 0) if purchases > 0 else 999999999,
         })
 
-    return rows, debug_info
+    return rows  # 순수 list[dict] → pickle 직렬화 가능
 
 # ── 데이터 fetch ──────────────────────────────────────────────
 if fetch_btn:
@@ -503,13 +503,12 @@ if fetch_btn:
         fetch_ad_data.clear()  # 캐시 초기화 → API 강제 재호출
     with st.spinner("Meta API에서 데이터 가져오는 중..."):
         try:
-            rows, debug_info = fetch_ad_data(
+            rows = fetch_ad_data(
                 str(start_date), str(end_date),
                 ACCESS_TOKEN, AD_ACCOUNT_ID, APP_ID, APP_SECRET
             )
             st.session_state.df = pd.DataFrame(rows)
-            st.session_state.ad_cache_debug = debug_info
-            cache_msg = " (새로고침)" if force_refresh else " (캐시 사용 가능)"
+            cache_msg = " (새로고침)" if force_refresh else ""
             st.success(f"✅  총 {len(rows)}개 소재 로드 완료{cache_msg}")
         except Exception as e:
             st.error(f"오류 발생: {e}")
@@ -697,13 +696,6 @@ if st.session_state.df is not None:
     with st.expander("🔍 디버그"):
         debug_df = df[["광고명", "썸네일", "영상여부", "상태"]].head(5)
         st.dataframe(debug_df)
-        if "ad_cache_debug" in st.session_state:
-            dbg = st.session_state.ad_cache_debug
-            st.write(f"캐시된 광고 수: {dbg['count']}개")
-            if dbg["error"]:
-                st.error(f"캐시 오류: {dbg['error']}")
-            if dbg["sample"]:
-                st.json(dbg["sample"])
 
     csv = df.drop(columns=["썸네일", "영상여부"]).to_csv(index=False).encode("utf-8-sig")
     st.download_button("📥 CSV 다운로드", csv, "ad_performance.csv", "text/csv")
