@@ -91,6 +91,7 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     margin-bottom: 1rem;
     border: 1px solid #f0f0f0;
+    overflow: visible;
 }
 
 .badge-active { background:#e8f5e9; color:#2e7d32; padding:2px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
@@ -103,21 +104,28 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
     position: relative;
     width: 160px;
     height: 284px;
-    overflow: hidden;
     border-radius: 10px;
-    overflow: hidden;
     flex-shrink: 0;
     background: #f0f0f0;
     cursor: zoom-in;
+    overflow: visible;
+    z-index: 1;
 }
 .media-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.35s ease;
+    border-radius: 10px;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, z-index 0s;
+    position: relative;
+    z-index: 1;
 }
-.media-wrap img:hover { transform: scale(1.12); }
+.media-wrap img:hover {
+    transform: scale(2.2);
+    z-index: 9999;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
 
 </style>
 """, unsafe_allow_html=True)
