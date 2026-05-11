@@ -7,6 +7,28 @@ from facebook_business.adobjects.adsinsights import AdsInsights
 import pandas as pd
 from datetime import date, timedelta
 
+# 유튜브 영상 매핑 (광고명 키워드 → 유튜브 영상 ID)
+YOUTUBE_MAP = {
+    "tegi":       "A6yhM5cof-A",
+    "treeh0me":   "4ezU_-2qUqI",
+    "annaro":     "lc5mJXUNcwY",
+    "darlene":    "kScggDky4To",
+    "greentica":  "K9ySFTLm_oE",
+    "hyejeong":   "AEBPuroGCFg",
+    "milkwood":   "t0ApHhQw_58",
+    "skyhome":    "LNdsbtmcseI",
+    "yodanara":   "zu0j2ZFWfwY",
+    "yongyoung":  "odUv2ZC06NQ",
+    "ysh":        "7slrfAou8KE",
+}
+
+def get_youtube_id(ad_name):
+    name_lower = ad_name.lower()
+    for keyword, vid_id in YOUTUBE_MAP.items():
+        if keyword in name_lower:
+            return vid_id
+    return None
+
 st.set_page_config(page_title="LLS AD Dashboard", page_icon="📊", layout="wide")
 
 def check_login():
@@ -81,6 +103,7 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
     position: relative;
     width: 160px;
     height: 284px;
+    overflow: hidden;
     border-radius: 10px;
     overflow: hidden;
     flex-shrink: 0;
@@ -302,6 +325,19 @@ if st.session_state.df is not None:
         return f'<span class="badge-paused">{s}</span>'
 
     def media_html(row):
+        ad_name = row["광고명"]
+        yt_id = get_youtube_id(ad_name)
+
+        if yt_id:
+            thumb = f"https://img.youtube.com/vi/{yt_id}/hqdefault.jpg"
+            yt_url = f"https://youtube.com/shorts/{yt_id}"
+            return f'''<a href="{yt_url}" target="_blank" style="display:block;text-decoration:none;">
+  <div class="media-wrap" style="cursor:pointer;">
+    <img src="{thumb}" />
+    <div style="position:absolute;bottom:6px;right:6px;background:rgba(200,0,0,0.85);color:white;font-size:0.65rem;padding:2px 7px;border-radius:4px;font-weight:700;">▶ YouTube</div>
+  </div>
+</a>'''
+
         thumb_url = row["썸네일"]
         if not thumb_url:
             label = "🎬 영상 소재" if row["영상여부"] else "No Image"
