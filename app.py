@@ -629,8 +629,8 @@ if st.session_state.df is not None:
         order_map = {
             "구매전환금액":   ["전환금액", "ROAS", "비용"],
             "ROAS":          ["ROAS",     "전환금액", "비용"],
-            "CVR(%)":        ["CVR",      "ROAS", "전환금액"],
-            "구매당비용_asc": ["구매당비용", "ROAS", "전환금액"],
+            "CVR(%)":        ["CVR",      "비용", "ROAS"],
+            "구매당비용_asc": ["구매당비용", "비용", "ROAS"],
         }
         keys = order_map.get(sort_by, ["ROAS", "전환금액", "비용"])
         html = '<div class="kpi-row">'
