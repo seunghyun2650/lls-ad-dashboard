@@ -107,10 +107,8 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
     border-radius: 10px;
     flex-shrink: 0;
     background: #f0f0f0;
-    cursor: zoom-in;
-    overflow: visible;
+    overflow: hidden;
     z-index: 1;
-    isolation: isolate;
 }
 .media-wrap img {
     width: 100%;
@@ -118,24 +116,8 @@ html, body, [class*="css"] { font-family: 'Noto Sans KR', sans-serif; }
     object-fit: cover;
     display: block;
     border-radius: 10px;
-    transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.35s ease;
     position: relative;
     z-index: 1;
-    transform-origin: left center;
-}
-.media-wrap img:hover {
-    transform: scale(2.5);
-    z-index: 9999;
-    box-shadow: 0 16px 48px rgba(0,0,0,0.45);
-    border-radius: 10px;
-}
-.media-wrap a img {
-    transform-origin: left center;
-}
-.media-wrap a img:hover {
-    transform: scale(2.5);
-    z-index: 9999;
-    box-shadow: 0 16px 48px rgba(0,0,0,0.45);
 }
 
 </style>
