@@ -673,6 +673,7 @@ if st.session_state.df is not None:
     {f'<div class="card-date">{date_txt}</div>' if date_txt else ''}
     {kpi_html}
     <div class="card-tags">
+      <span class="tag">광고비 {row['비용']:,.0f}원</span>
       <span class="tag">구매 {row['구매전환']}건</span>
       <span class="tag">CVR {row['CVR(%)']}%</span>
       <span class="tag">CTR {row['CTR(%)']}%</span>
