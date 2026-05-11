@@ -376,8 +376,13 @@ with col3:
     st.markdown("</div>", unsafe_allow_html=True)
 with col4:
     st.markdown("<div style='padding-top:1.8rem;'>", unsafe_allow_html=True)
-    force_refresh = st.checkbox("🔄 최신 데이터로 새로고침", value=False,
-                                help="체크하면 캐시를 무시하고 Meta API를 새로 호출합니다")
+    force_refresh = st.checkbox("🔄 최신 데이터로 새로고침", value=False)
+    st.markdown("""
+    <p style="font-size:0.7rem;color:#a1a1aa;margin:0.2rem 0 0 1.6rem;line-height:1.5;">
+        체크 후 불러오기 → Meta에서 최신 데이터 재조회<br>
+        미체크 시 같은 날짜면 저장된 데이터 사용 (빠름)
+    </p>
+    """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 if "df" not in st.session_state:
