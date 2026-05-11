@@ -226,6 +226,7 @@ header[data-testid="stHeader"] { background: transparent !important; }
     padding: 3px 8px;
     border-radius: 100px;
     backdrop-filter: blur(4px);
+    z-index: 10;
 }
 .sp-active {
     background: rgba(220,252,231,0.92);
@@ -548,8 +549,10 @@ if st.session_state.df is not None:
         ad_name = row["광고명"]
         yt_id = get_youtube_id(ad_name)
 
+        THUMB_H = 220  # 모든 카드 썸네일 높이 통일
+
         if yt_id:
-            # YouTube: 가로형 썸네일 → 낮은 컨테이너 + cover
+            # YouTube: 가로형 썸네일 → 블러 배경 + cover로 꽉 채움
             thumb    = f"https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg"
             fallback = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
             yt_url   = f"https://youtube.com/shorts/{yt_id}"
@@ -558,12 +561,11 @@ if st.session_state.df is not None:
        style="width:100%;height:100%;object-fit:cover;display:block;" />
   <span class="yt-badge">▶ YouTube</span>
 </a>'''
-            return 190, inner
+            return THUMB_H, inner
 
         url = row["썸네일"]
         if url:
-            # 이미지형: 블러 배경 + 원본 contain
-            # → 세로 이미지가 잘리지 않고 전체가 보임
+            # 이미지형: 블러 배경 + 원본 contain → 세로 이미지 전체 표시
             inner = f'''
 <div style="position:absolute;inset:-20px;
             background-image:url('{url}');
@@ -573,10 +575,10 @@ if st.session_state.df is not None:
      style="position:relative;z-index:1;
             width:100%;height:100%;
             object-fit:contain;display:block;" />'''
-            return 260, inner
+            return THUMB_H, inner
 
         label = "🎬 영상 소재" if row["영상여부"] else "이미지 없음"
-        return 190, f'<div class="thumb-no-img">{label}</div>'
+        return THUMB_H, f'<div class="thumb-no-img">{label}</div>'
 
     def render_grid(df_render, show_rank=False):
         cards = ""
