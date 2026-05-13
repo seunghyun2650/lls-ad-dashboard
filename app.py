@@ -7,7 +7,7 @@ from facebook_business.adobjects.adsinsights import AdsInsights
 import pandas as pd
 from datetime import date, timedelta
 
-# ── 유튜브 영상 매핑 ──────────────────────────────────────────
+# ── 유튜브 영상 매핑 (기본값 - 키워드:영상ID) ────────────────
 YOUTUBE_MAP = {
     "tegi":       "A6yhM5cof-A",
     "treeh0me":   "4ezU_-2qUqI",
@@ -22,7 +22,28 @@ YOUTUBE_MAP = {
     "ysh":        "7slrfAou8KE",
 }
 
+def parse_youtube_id(url):
+    """YouTube URL에서 영상 ID 추출 (Shorts/일반/단축 URL 모두 지원)"""
+    import re
+    patterns = [
+        r'youtube\.com/shorts/([A-Za-z0-9_-]{11})',
+        r'youtu\.be/([A-Za-z0-9_-]{11})',
+        r'youtube\.com/watch\?v=([A-Za-z0-9_-]{11})',
+        r'youtube\.com/embed/([A-Za-z0-9_-]{11})',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    return None
+
 def get_youtube_id(ad_name):
+    """광고명으로 YouTube ID 조회 - 기본맵 + 세션 추가분 통합"""
+    # 1. 세션에 직접 저장된 광고명 정확 매칭 (UI에서 추가한 것)
+    session_map = st.session_state.get("youtube_additions", {})
+    if ad_name in session_map:
+        return session_map[ad_name]
+    # 2. 기본 키워드 매핑
     name_lower = ad_name.lower()
     for keyword, vid_id in YOUTUBE_MAP.items():
         if keyword in name_lower:
@@ -389,6 +410,8 @@ if "df" not in st.session_state:
     st.session_state.df = None
 if "sort_by" not in st.session_state:
     st.session_state.sort_by = "구매전환금액"
+if "youtube_additions" not in st.session_state:
+    st.session_state.youtube_additions = {}
 
 # ── 캐싱 함수 (날짜가 같으면 API 재호출 없음) ─────────────────
 @st.cache_data(show_spinner=False)
@@ -512,6 +535,61 @@ if fetch_btn:
             st.success(f"✅  총 {len(rows)}개 소재 로드 완료{cache_msg}")
         except Exception as e:
             st.error(f"오류 발생: {e}")
+
+# ── YouTube 썸네일 관리 ───────────────────────────────────────
+if st.session_state.df is not None:
+    df_check = st.session_state.df
+    # 영상 소재 중 YouTube 매핑이 없는 것만 필터
+    unmapped = df_check[df_check["영상여부"] == True]["광고명"].unique()
+    unmapped = [n for n in unmapped if get_youtube_id(n) is None]
+
+    if unmapped:
+        with st.expander(f"🎬 YouTube 썸네일 미등록 영상 {len(unmapped)}개 — 클릭해서 등록"):
+            st.markdown(
+                '<p style="font-size:0.78rem;color:#71717a;margin-bottom:1rem;">'
+                'YouTube Shorts URL을 붙여넣으면 바로 썸네일이 적용됩니다.<br>'
+                '등록한 내용은 현재 세션 동안 유지되며, 새로고침 후에도 유지하려면 '
+                'Streamlit Cloud → Settings → Secrets에 추가해주세요.</p>',
+                unsafe_allow_html=True
+            )
+            for ad_name in unmapped:
+                col_name, col_input, col_btn = st.columns([3, 4, 1])
+                with col_name:
+                    st.markdown(
+                        f'<p style="font-size:0.8rem;color:#18181b;font-weight:600;'
+                        f'padding-top:0.5rem;white-space:nowrap;overflow:hidden;'
+                        f'text-overflow:ellipsis;" title="{ad_name}">{ad_name}</p>',
+                        unsafe_allow_html=True
+                    )
+                with col_input:
+                    url = st.text_input(
+                        "URL", key=f"yt_input_{ad_name}",
+                        placeholder="https://youtube.com/shorts/...",
+                        label_visibility="collapsed"
+                    )
+                with col_btn:
+                    if st.button("등록", key=f"yt_btn_{ad_name}"):
+                        yt_id = parse_youtube_id(url) if url else None
+                        if yt_id:
+                            st.session_state.youtube_additions[ad_name] = yt_id
+                            st.success(f"✅ 등록 완료!")
+                            st.rerun()
+                        else:
+                            st.error("URL을 확인해주세요")
+
+            # 현재 추가된 매핑 요약 (Secrets 복사용)
+            if st.session_state.youtube_additions:
+                st.markdown("---")
+                st.markdown(
+                    '<p style="font-size:0.75rem;color:#a1a1aa;">🔒 영구 저장하려면 아래 내용을 '
+                    'Streamlit Cloud → Settings → Secrets의 <code>[youtube_map]</code> 섹션에 추가하세요</p>',
+                    unsafe_allow_html=True
+                )
+                toml_lines = "\n".join(
+                    f'"{k}" = "{v}"'
+                    for k, v in st.session_state.youtube_additions.items()
+                )
+                st.code(f"[youtube_map]\n{toml_lines}", language="toml")
 
 # ── 렌더링 ────────────────────────────────────────────────────
 if st.session_state.df is not None:
