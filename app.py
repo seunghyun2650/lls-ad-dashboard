@@ -366,6 +366,104 @@ div[data-testid="column"]:last-child .stButton > button {
 
 /* expander */
 .streamlit-expanderHeader { font-size: 0.8rem !important; }
+
+/* ── 리스트 뷰 ── */
+.ad-list { display: flex; flex-direction: column; gap: 10px; }
+
+.list-row {
+    background: #fff;
+    border-radius: 14px;
+    display: flex;
+    align-items: stretch;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+.list-row:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+.list-thumb {
+    position: relative;
+    width: 140px;
+    flex-shrink: 0;
+    background: #f4f4f5;
+    overflow: hidden;
+}
+.list-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+}
+
+.list-body {
+    flex: 1;
+    padding: 0.85rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    gap: 0.6rem;
+}
+.list-name {
+    font-size: 0.9rem; font-weight: 700; color: #18181b;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 0.1rem;
+}
+.list-meta {
+    font-size: 0.7rem; color: #a1a1aa;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.list-metrics {
+    display: flex; flex-wrap: wrap; gap: 6px;
+}
+.lm-item {
+    background: #fafaf9; border-radius: 8px;
+    padding: 0.35rem 0.65rem; text-align: center;
+    border: 1px solid #f0f0f0; min-width: 72px;
+}
+.lm-primary {
+    background: #f0f9ff; border-color: #bae6fd;
+}
+.lm-lbl {
+    font-size: 0.58rem; color: #a1a1aa;
+    font-weight: 500; margin-bottom: 0.1rem;
+}
+.lm-lbl-primary {
+    font-size: 0.58rem; color: #0284c7;
+    font-weight: 700; margin-bottom: 0.1rem;
+}
+.lm-val {
+    font-size: 0.82rem; font-weight: 700; color: #18181b;
+}
+
+/* ── Summary 뷰 ── */
+.sum-stat {
+    flex: 1; background: white; border-radius: 12px;
+    padding: 1rem 1.2rem; text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid #f0f0f0;
+}
+.sum-stat-val { font-size: 1.8rem; font-weight: 700; color: #18181b; }
+.sum-stat-lbl { font-size: 0.72rem; color: #a1a1aa; margin-top: 0.2rem; }
+
+.sum-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.65rem 0.8rem; border-radius: 10px;
+    margin-bottom: 6px; background: white;
+    border: 1px solid #f0f0f0;
+}
+.sum-rank { font-size: 0.7rem; font-weight: 700; color: #a1a1aa; min-width: 22px; }
+.sum-thumb {
+    position: relative; width: 56px; height: 56px;
+    border-radius: 8px; overflow: hidden; flex-shrink: 0;
+    background: #f4f4f5;
+}
+.sum-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.sum-name {
+    font-size: 0.8rem; font-weight: 600; color: #18181b;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 0.1rem;
+}
+.sum-roas { font-size: 0.9rem; font-weight: 700; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -628,153 +726,197 @@ if st.session_state.df is not None:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── 정렬 ──
-    st.markdown('<p class="section-title">소재별 성과</p>', unsafe_allow_html=True)
-    c1, c2, c3, c4, _ = st.columns([1.4, 1.2, 1.2, 1.5, 3])
-    with c1:
-        if st.button("💰 전환금액 높은순"): st.session_state.sort_by = "구매전환금액"
-    with c2:
-        if st.button("📈 ROAS 높은순"):     st.session_state.sort_by = "ROAS"
-    with c3:
-        if st.button("🎯 CVR 높은순"):      st.session_state.sort_by = "CVR(%)"
-    with c4:
-        if st.button("💸 구매당비용 낮은순"): st.session_state.sort_by = "구매당비용_asc"
-
-    sort_label_map = {
-        "구매전환금액":   "전환금액 높은순",
-        "ROAS":          "ROAS 높은순",
-        "CVR(%)":        "CVR 높은순",
-        "구매당비용_asc": "구매당비용 낮은순",
-    }
-    st.caption(f"정렬 기준 : {sort_label_map.get(st.session_state.sort_by, '')}")
-
-    ascending = st.session_state.sort_by == "구매당비용_asc"
-    sort_col  = "구매당비용" if st.session_state.sort_by == "구매당비용_asc" else st.session_state.sort_by
-    df_sorted = df.sort_values(sort_col, ascending=ascending).reset_index(drop=True)
-
-    # ── 헬퍼 ──
+    # ── 헬퍼 함수 ──────────────────────────────────────────────
     def roas_color_class(r):
         if r >= 3:   return "kv-green"
         elif r >= 1: return "kv-amber"
         return "kv-red"
 
-    def thumb_html(row):
-        """그리드 카드용 썸네일 HTML — (height_px, inner_html) 튜플 반환"""
-        ad_name = row["광고명"]
-        yt_id = get_youtube_id(ad_name)
-
-        THUMB_H = 220  # 모든 카드 썸네일 높이 통일
-
+    def thumb_inner_html(row, height=160):
+        """썸네일 inner HTML 반환 (list/summary 공용)"""
+        yt_id = get_youtube_id(row["광고명"])
         if yt_id:
-            # YouTube: 가로형 썸네일 → 블러 배경 + cover로 꽉 채움
             thumb    = f"https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg"
             fallback = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
             yt_url   = f"https://youtube.com/shorts/{yt_id}"
-            inner = f'''<a href="{yt_url}" target="_blank" style="display:block;height:100%;">
+            return f'''<a href="{yt_url}" target="_blank" style="display:block;height:100%;">
   <img src="{thumb}" onerror="this.src='{fallback}'"
        style="width:100%;height:100%;object-fit:cover;display:block;" />
   <span class="yt-badge">▶ YouTube</span>
 </a>'''
-            return THUMB_H, inner
-
         url = row["썸네일"]
         if url:
-            # 이미지형: 블러 배경 + 원본 contain → 세로 이미지 전체 표시
-            inner = f'''
-<div style="position:absolute;inset:-20px;
-            background-image:url('{url}');
+            return f'''
+<div style="position:absolute;inset:-20px;background-image:url('{url}');
             background-size:cover;background-position:center;
             filter:blur(20px);opacity:0.5;transform:scale(1.1);"></div>
-<img src="{url}"
-     style="position:relative;z-index:1;
-            width:100%;height:100%;
-            object-fit:contain;display:block;" />'''
-            return THUMB_H, inner
+<img src="{url}" style="position:relative;z-index:1;
+     width:100%;height:100%;object-fit:contain;display:block;" />'''
+        label = "🎬 영상" if row["영상여부"] else "이미지 없음"
+        return f'<div class="thumb-no-img">{label}</div>'
 
-        label = "🎬 영상 소재" if row["영상여부"] else "이미지 없음"
-        return THUMB_H, f'<div class="thumb-no-img">{label}</div>'
-
-    def build_kpi_html(row, sort_by, roas_pct, rc, spend_per):
-        """정렬 기준에 따라 KPI 박스 3개를 동적으로 구성"""
-        all_kpis = {
-            "전환금액":  ("전환금액",  f"{row['구매전환금액']:,.0f}원", ""),
-            "ROAS":      ("ROAS",      roas_pct,                        rc),
-            "비용":      ("비용",      f"{row['비용']:,.0f}원",          ""),
-            "CVR":       ("CVR",       f"{row['CVR(%)']}%",             ""),
-            "구매당비용": ("구매당비용", spend_per,                       ""),
+    def render_list(df_render, sort_key="ROAS"):
+        """리스트형 렌더링 — 썸네일 크게 왼쪽, 지표 오른쪽"""
+        # 정렬 기준별 지표 순서 (첫 번째가 강조)
+        metric_order = {
+            "ROAS":     ["ROAS", "전환금액", "광고비", "구매당비용", "CVR", "구매수", "CTR", "노출"],
+            "구매당비용": ["구매당비용", "광고비", "ROAS", "전환금액", "CVR", "구매수", "CTR", "노출"],
+            "CVR":      ["CVR", "ROAS", "광고비", "전환금액", "구매당비용", "구매수", "CTR", "노출"],
+            "전환금액":  ["전환금액", "ROAS", "광고비", "구매당비용", "CVR", "구매수", "CTR", "노출"],
         }
-        # 정렬 기준별 순서: 첫 번째가 핵심 지표
-        order_map = {
-            "구매전환금액":   ["전환금액", "ROAS", "비용"],
-            "ROAS":          ["ROAS",     "전환금액", "비용"],
-            "CVR(%)":        ["CVR",      "비용", "ROAS"],
-            "구매당비용_asc": ["구매당비용", "비용", "ROAS"],
-        }
-        keys = order_map.get(sort_by, ["ROAS", "전환금액", "비용"])
-        html = '<div class="kpi-row">'
-        for idx, key in enumerate(keys):
-            label, value, cls = all_kpis[key]
-            if idx == 0:
-                html += f'<div class="kpi-box kpi-box-active"><div class="kpi-lbl-active">{label}</div><div class="kpi-val {cls}">{value}</div></div>'
-            else:
-                html += f'<div class="kpi-box"><div class="kpi-lbl">{label}</div><div class="kpi-val {cls}">{value}</div></div>'
-        html += '</div>'
-        return html
+        order = metric_order.get(sort_key, metric_order["ROAS"])
 
-    def render_grid(df_render, show_rank=False, sort_by="구매전환금액"):
-        cards = ""
+        rows_html = ""
         for i, (_, row) in enumerate(df_render.iterrows()):
-            roas_pct = f"{row['ROAS']*100:.0f}%"
-            rc = roas_color_class(row["ROAS"])
+            roas_pct  = f"{row['ROAS']*100:.0f}%"
+            rc        = roas_color_class(row["ROAS"])
             spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
+            sp_cls    = "sp-active" if row["상태"] == "ACTIVE" else "sp-paused"
+            sp_text   = "운영중" if row["상태"] == "ACTIVE" else ("정지" if row["상태"] == "PAUSED" else row["상태"])
+            date_txt  = row["시작일"] if row["시작일"] else "-"
 
-            sp_cls  = "sp-active" if row["상태"] == "ACTIVE" else "sp-paused"
-            sp_text = "운영중" if row["상태"] == "ACTIVE" else ("정지" if row["상태"] == "PAUSED" else row["상태"])
+            all_metrics = {
+                "ROAS":     (roas_pct, rc),
+                "전환금액":  (f"{row['구매전환금액']:,.0f}원", ""),
+                "광고비":    (f"{row['비용']:,.0f}원", ""),
+                "CVR":      (f"{row['CVR(%)']}%", ""),
+                "구매당비용": (spend_per, ""),
+                "구매수":    (f"{row['구매전환']}건", ""),
+                "CTR":      (f"{row['CTR(%)']}%", ""),
+                "노출":      (f"{row['노출수']:,}", ""),
+            }
 
-            rank_badge = f'<span style="position:absolute;top:9px;right:9px;background:rgba(0,0,0,0.55);color:white;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:100px;">#{i+1}</span>' if show_rank else ""
+            metrics_html = ""
+            for idx, key in enumerate(order):
+                val, cls = all_metrics[key]
+                if idx == 0:
+                    metrics_html += f'''<div class="lm-item lm-primary">
+  <div class="lm-lbl lm-lbl-primary">{key}</div>
+  <div class="lm-val {cls}">{val}</div>
+</div>'''
+                else:
+                    metrics_html += f'''<div class="lm-item">
+  <div class="lm-lbl">{key}</div>
+  <div class="lm-val {cls}">{val}</div>
+</div>'''
 
-            date_txt = f'📅 {row["시작일"]}' if row["시작일"] else ""
-
-            thumb_h, thumb_inner = thumb_html(row)
-            kpi_html = build_kpi_html(row, sort_by, roas_pct, rc, spend_per)
-
-            cards += f"""
-<div class="ad-card-g">
-  <div class="thumb-area" style="height:{thumb_h}px;">
-    {thumb_inner}
+            inner = thumb_inner_html(row)
+            rows_html += f"""
+<div class="list-row">
+  <div class="list-thumb">
+    {inner}
     <span class="status-pill {sp_cls}">{sp_text}</span>
-    {rank_badge}
   </div>
-  <div class="card-body">
-    <div class="card-ad-name" title="{row['광고명']}">{row['광고명']}</div>
-    <div class="card-adset" title="{row['광고세트']}">{row['광고세트']}</div>
-    {f'<div class="card-date">{date_txt}</div>' if date_txt else ''}
-    {kpi_html}
-    <div class="card-tags">
-      <span class="tag">광고비 {row['비용']:,.0f}원</span>
-      <span class="tag">구매 {row['구매전환']}건</span>
-      <span class="tag">CVR {row['CVR(%)']}%</span>
-      <span class="tag">CTR {row['CTR(%)']}%</span>
-      <span class="tag">구매당 {spend_per}</span>
-      <span class="tag">노출 {row['노출수']:,}</span>
+  <div class="list-body">
+    <div>
+      <div class="list-name">{row['광고명']}</div>
+      <div class="list-meta">{row['광고세트']} · {date_txt}</div>
     </div>
+    <div class="list-metrics">{metrics_html}</div>
   </div>
 </div>"""
 
-        st.markdown(f'<div class="ad-grid">{cards}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="ad-list">{rows_html}</div>', unsafe_allow_html=True)
 
-    render_grid(df_sorted, sort_by=st.session_state.sort_by)
+    def render_summary(df):
+        """Summary 탭 — 전체 현황 + TOP 5 랭킹"""
+        active_cnt    = len(df[df["상태"] == "ACTIVE"])
+        paused_cnt    = len(df[df["상태"] == "PAUSED"])
+        profitable    = len(df[df["ROAS"] >= 1])
+        total_cnt     = len(df)
 
-    # ── TOP 5 ──
-    st.markdown("<div style='margin-top:2.5rem;'></div>", unsafe_allow_html=True)
-    st.markdown('<p class="section-title">🏆 베스트 소재 TOP 5 <span style="font-size:0.75rem;color:#a1a1aa;font-weight:400;">ROAS 기준</span></p>', unsafe_allow_html=True)
-    render_grid(df.sort_values("ROAS", ascending=False).head(5).reset_index(drop=True), show_rank=True, sort_by="ROAS")
+        st.markdown(f"""
+<div style="display:flex;gap:12px;margin-bottom:1.8rem;">
+  <div class="sum-stat"><div class="sum-stat-val">{total_cnt}</div><div class="sum-stat-lbl">전체 소재</div></div>
+  <div class="sum-stat"><div class="sum-stat-val" style="color:#15803d;">{active_cnt}</div><div class="sum-stat-lbl">운영중</div></div>
+  <div class="sum-stat"><div class="sum-stat-val" style="color:#71717a;">{paused_cnt}</div><div class="sum-stat-lbl">정지</div></div>
+  <div class="sum-stat"><div class="sum-stat-val" style="color:#0284c7;">{profitable}</div><div class="sum-stat-lbl">ROAS 100% 이상</div></div>
+</div>
+""", unsafe_allow_html=True)
 
-    # ── 디버그 / CSV ──
+        col_l, col_r = st.columns(2)
+
+        with col_l:
+            st.markdown('<p class="section-title">🏆 ROAS TOP 5</p>', unsafe_allow_html=True)
+            top5 = df.sort_values("ROAS", ascending=False).head(5).reset_index(drop=True)
+            rows = ""
+            for i, (_, r) in enumerate(top5.iterrows()):
+                roas_pct = f"{r['ROAS']*100:.0f}%"
+                rc = roas_color_class(r["ROAS"])
+                inner = thumb_inner_html(r, height=56)
+                sp_cls = "sp-active" if r["상태"] == "ACTIVE" else "sp-paused"
+                sp_text = "운영중" if r["상태"] == "ACTIVE" else "정지"
+                rows += f"""
+<div class="sum-row">
+  <span class="sum-rank">#{i+1}</span>
+  <div class="sum-thumb">
+    {inner}
+    <span class="status-pill {sp_cls}" style="font-size:0.55rem;padding:2px 5px;top:4px;left:4px;">{sp_text}</span>
+  </div>
+  <div style="flex:1;min-width:0;">
+    <div class="sum-name">{r['광고명']}</div>
+    <div style="font-size:0.65rem;color:#a1a1aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{r['광고세트']}</div>
+  </div>
+  <div style="text-align:right;flex-shrink:0;">
+    <div class="sum-roas {rc}">{roas_pct}</div>
+    <div style="font-size:0.65rem;color:#a1a1aa;">{r['구매전환금액']:,.0f}원</div>
+  </div>
+</div>"""
+            st.markdown(f'<div>{rows}</div>', unsafe_allow_html=True)
+
+        with col_r:
+            st.markdown('<p class="section-title">💰 전환금액 TOP 5</p>', unsafe_allow_html=True)
+            top5c = df.sort_values("구매전환금액", ascending=False).head(5).reset_index(drop=True)
+            rows = ""
+            for i, (_, r) in enumerate(top5c.iterrows()):
+                roas_pct = f"{r['ROAS']*100:.0f}%"
+                rc = roas_color_class(r["ROAS"])
+                inner = thumb_inner_html(r, height=56)
+                sp_cls = "sp-active" if r["상태"] == "ACTIVE" else "sp-paused"
+                sp_text = "운영중" if r["상태"] == "ACTIVE" else "정지"
+                rows += f"""
+<div class="sum-row">
+  <span class="sum-rank">#{i+1}</span>
+  <div class="sum-thumb">
+    {inner}
+    <span class="status-pill {sp_cls}" style="font-size:0.55rem;padding:2px 5px;top:4px;left:4px;">{sp_text}</span>
+  </div>
+  <div style="flex:1;min-width:0;">
+    <div class="sum-name">{r['광고명']}</div>
+    <div style="font-size:0.65rem;color:#a1a1aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{r['광고세트']}</div>
+  </div>
+  <div style="text-align:right;flex-shrink:0;">
+    <div style="font-size:0.9rem;font-weight:700;color:#18181b;">{r['구매전환금액']:,.0f}원</div>
+    <div style="font-size:0.65rem;color:#a1a1aa;">ROAS <span class="{rc}">{roas_pct}</span></div>
+  </div>
+</div>"""
+            st.markdown(f'<div>{rows}</div>', unsafe_allow_html=True)
+
+    # ── 탭 ────────────────────────────────────────────────────
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📊  Summary",
+        "📈  ROAS 높은순",
+        "💸  구매당비용 낮은순",
+        "🎯  CVR 높은순",
+        "💰  전환금액 높은순",
+    ])
+
+    with tab1:
+        render_summary(df)
+
+    with tab2:
+        render_list(df.sort_values("ROAS", ascending=False).reset_index(drop=True), "ROAS")
+
+    with tab3:
+        render_list(df.sort_values("구매당비용", ascending=True).reset_index(drop=True), "구매당비용")
+
+    with tab4:
+        render_list(df.sort_values("CVR(%)", ascending=False).reset_index(drop=True), "CVR")
+
+    with tab5:
+        render_list(df.sort_values("구매전환금액", ascending=False).reset_index(drop=True), "전환금액")
+
+    # ── CSV ───────────────────────────────────────────────────
     st.markdown("<div style='margin-top:1.5rem;'></div>", unsafe_allow_html=True)
-    with st.expander("🔍 디버그"):
-        debug_df = df[["광고명", "썸네일", "영상여부", "상태"]].head(5)
-        st.dataframe(debug_df)
-
     csv = df.drop(columns=["썸네일", "영상여부"]).to_csv(index=False).encode("utf-8-sig")
     st.download_button("📥 CSV 다운로드", csv, "ad_performance.csv", "text/csv")
