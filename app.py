@@ -675,19 +675,20 @@ if st.session_state.df is not None:
                         else:
                             st.error("URL을 확인해주세요")
 
-            # 현재 추가된 매핑 요약 (Secrets 복사용)
-            if st.session_state.youtube_additions:
-                st.markdown("---")
-                st.markdown(
-                    '<p style="font-size:0.75rem;color:#a1a1aa;">🔒 영구 저장하려면 아래 내용을 '
-                    'Streamlit Cloud → Settings → Secrets의 <code>[youtube_map]</code> 섹션에 추가하세요</p>',
-                    unsafe_allow_html=True
-                )
-                toml_lines = "\n".join(
-                    f'"{k}" = "{v}"'
-                    for k, v in st.session_state.youtube_additions.items()
-                )
-                st.code(f"[youtube_map]\n{toml_lines}", language="toml")
+            pass  # TOML 코드는 배너 밖에서 표시
+
+# ── YouTube 등록 후 Secrets 저장 안내 ────────────────────────
+if st.session_state.get("youtube_additions"):
+    toml_lines = "\n".join(
+        f'"{k}" = "{v}"'
+        for k, v in st.session_state.youtube_additions.items()
+    )
+    st.info(
+        "🔒 **영구 저장 필요** — 아래 코드를 복사해서 "
+        "Streamlit Cloud → Settings → Secrets에 붙여넣으세요. "
+        "저장하지 않으면 새로고침 시 사라져요."
+    )
+    st.code(f"[youtube_map]\n{toml_lines}", language="toml")
 
 # ── 렌더링 ────────────────────────────────────────────────────
 if st.session_state.df is not None:
