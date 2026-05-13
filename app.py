@@ -38,12 +38,19 @@ def parse_youtube_id(url):
     return None
 
 def get_youtube_id(ad_name):
-    """광고명으로 YouTube ID 조회 - 기본맵 + 세션 추가분 통합"""
-    # 1. 세션에 직접 저장된 광고명 정확 매칭 (UI에서 추가한 것)
+    """광고명으로 YouTube ID 조회 - 세션 → Secrets → 기본맵 순으로 확인"""
+    # 1. 세션 추가분 (UI에서 방금 등록한 것)
     session_map = st.session_state.get("youtube_additions", {})
     if ad_name in session_map:
         return session_map[ad_name]
-    # 2. 기본 키워드 매핑
+    # 2. Streamlit Secrets의 [youtube_map] 섹션
+    try:
+        secrets_map = st.secrets.get("youtube_map", {})
+        if ad_name in secrets_map:
+            return secrets_map[ad_name]
+    except Exception:
+        pass
+    # 3. 코드에 하드코딩된 기본 키워드 매핑
     name_lower = ad_name.lower()
     for keyword, vid_id in YOUTUBE_MAP.items():
         if keyword in name_lower:
