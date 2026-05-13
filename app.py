@@ -865,8 +865,11 @@ if st.session_state.df is not None:
             st.markdown(f'<div>{rows}</div>', unsafe_allow_html=True)
 
         with col_r:
-            st.markdown('<p class="section-title">💰 전환금액 TOP 5</p>', unsafe_allow_html=True)
-            top5c = df.sort_values("구매전환금액", ascending=False).head(5).reset_index(drop=True)
+            st.markdown('<p class="section-title">💸 구매당비용 낮은순 TOP 5</p>', unsafe_allow_html=True)
+            # 구매가 있는 소재만 (999999999 제외)
+            top5c = (df[df["구매당비용"] < 999999999]
+                     .sort_values("구매당비용", ascending=True)
+                     .head(5).reset_index(drop=True))
             rows = ""
             for i, (_, r) in enumerate(top5c.iterrows()):
                 roas_pct = f"{r['ROAS']*100:.0f}%"
@@ -886,11 +889,19 @@ if st.session_state.df is not None:
     <div style="font-size:0.65rem;color:#a1a1aa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{r['광고세트']}</div>
   </div>
   <div style="text-align:right;flex-shrink:0;">
-    <div style="font-size:0.9rem;font-weight:700;color:#18181b;">{r['구매전환금액']:,.0f}원</div>
+    <div style="font-size:0.9rem;font-weight:700;color:#18181b;">{r['구매당비용']:,.0f}원</div>
     <div style="font-size:0.65rem;color:#a1a1aa;">ROAS <span class="{rc}">{roas_pct}</span></div>
   </div>
 </div>"""
             st.markdown(f'<div>{rows}</div>', unsafe_allow_html=True)
+
+    def sort_df(df, col, ascending):
+        """운영중 소재 먼저, 그 안에서 지표 기준 정렬"""
+        tmp = df.copy()
+        tmp["_s"] = (tmp["상태"] != "ACTIVE").astype(int)  # 0=운영중, 1=정지
+        return (tmp.sort_values(["_s", col], ascending=[True, ascending])
+                   .drop(columns=["_s"])
+                   .reset_index(drop=True))
 
     # ── 탭 ────────────────────────────────────────────────────
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -905,16 +916,16 @@ if st.session_state.df is not None:
         render_summary(df)
 
     with tab2:
-        render_list(df.sort_values("ROAS", ascending=False).reset_index(drop=True), "ROAS")
+        render_list(sort_df(df, "ROAS", False), "ROAS")
 
     with tab3:
-        render_list(df.sort_values("구매당비용", ascending=True).reset_index(drop=True), "구매당비용")
+        render_list(sort_df(df, "구매당비용", True), "구매당비용")
 
     with tab4:
-        render_list(df.sort_values("CVR(%)", ascending=False).reset_index(drop=True), "CVR")
+        render_list(sort_df(df, "CVR(%)", False), "CVR")
 
     with tab5:
-        render_list(df.sort_values("구매전환금액", ascending=False).reset_index(drop=True), "전환금액")
+        render_list(sort_df(df, "구매전환금액", False), "전환금액")
 
     # ── CSV ───────────────────────────────────────────────────
     st.markdown("<div style='margin-top:1.5rem;'></div>", unsafe_allow_html=True)
