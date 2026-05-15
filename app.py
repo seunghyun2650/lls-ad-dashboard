@@ -20,6 +20,7 @@ YOUTUBE_MAP = {
     "yodanara":   "zu0j2ZFWfwY",
     "yongyoung":  "odUv2ZC06NQ",
     "ysh":        "7slrfAou8KE",
+    "solseom":    "6KGIQBNj_1s",
 }
 
 def parse_youtube_id(url):
@@ -84,7 +85,7 @@ def check_login():
                     st.error("비밀번호가 틀렸습니다.")
         st.stop()
 
-# check_login()
+check_login()
 
 ACCESS_TOKEN = st.secrets["ACCESS_TOKEN"]
 AD_ACCOUNT_ID = st.secrets["AD_ACCOUNT_ID"]
@@ -472,6 +473,15 @@ div[data-testid="column"]:last-child .stButton > button {
 }
 .sum-roas { font-size: 0.9rem; font-weight: 700; }
 </style>
+""", unsafe_allow_html=True)
+
+# ── TEST 배너 ─────────────────────────────────────────────────
+st.markdown("""
+<div style="background:#ef4444;color:white;text-align:center;
+            padding:0.6rem;border-radius:10px;margin-bottom:1rem;
+            font-weight:700;font-size:0.95rem;letter-spacing:0.05em;">
+    🚧 TEST 페이지 — 실제 운영 사이트가 아닙니다
+</div>
 """, unsafe_allow_html=True)
 
 # ── 헤더 ─────────────────────────────────────────────────────
