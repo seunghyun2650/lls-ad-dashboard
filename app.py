@@ -940,15 +940,15 @@ if st.session_state.df is not None:
                    .reset_index(drop=True))
 
     # ── 광고세트별 보기 ────────────────────────────────────────
-    def render_adset_view(df_all):
+    def render_adset_view(df_all, col_key="ROAS", asc=False, sort_label="ROAS"):
         adset_groups = df_all.groupby("광고세트")
         for adset_name, df_adset in adset_groups:
-            adset_spend  = df_adset["비용"].sum()
-            adset_cv     = df_adset["구매전환금액"].sum()
-            adset_roas   = round(adset_cv / adset_spend, 2) if adset_spend > 0 else 0
-            adset_roas_pct = f"{adset_roas * 100:.0f}%"
+            adset_spend     = df_adset["비용"].sum()
+            adset_cv        = df_adset["구매전환금액"].sum()
+            adset_roas      = round(adset_cv / adset_spend, 2) if adset_spend > 0 else 0
+            adset_roas_pct  = f"{adset_roas * 100:.0f}%"
             adset_purchases = int(df_adset["구매전환"].sum())
-            active_cnt   = int((df_adset["상태"] == "ACTIVE").sum())
+            active_cnt      = int((df_adset["상태"] == "ACTIVE").sum())
             rc = "color:#16a34a;" if adset_roas >= 1 else "color:#dc2626;"
 
             st.markdown(f"""
@@ -971,7 +971,7 @@ if st.session_state.df is not None:
   </div>
 </div>
 """, unsafe_allow_html=True)
-            render_list(sort_df(df_adset, "ROAS", False), "ROAS")
+            render_list(sort_df(df_adset, col_key, asc), sort_label)
             st.markdown("<div style='margin-bottom:1.8rem;'></div>", unsafe_allow_html=True)
 
     # ── AI 효율 분석 ───────────────────────────────────────────
@@ -1143,40 +1143,38 @@ if st.session_state.df is not None:
         render_summary(df)
 
     with tab2:
-        # 정렬 옵션 + 광고세트별 토글
+        # 정렬 옵션 (광고세트 안에서 적용)
         sort_options = {
-            "📈 ROAS":       ("ROAS",        False, "ROAS"),
-            "💸 구매당비용":  ("구매당비용",   True,  "구매당비용"),
-            "🎯 CVR":        ("CVR(%)",       False, "CVR"),
-            "💰 전환금액":   ("구매전환금액",  False, "전환금액"),
+            "📈 ROAS":      ("ROAS",        False, "ROAS"),
+            "💸 구매당비용": ("구매당비용",   True,  "구매당비용"),
+            "🎯 CVR":       ("CVR(%)",       False, "CVR"),
+            "💰 전환금액":  ("구매전환금액",  False, "전환금액"),
         }
 
-        ctrl_l, ctrl_r = st.columns([3, 1])
-        with ctrl_l:
-            if "list_sort" not in st.session_state:
-                st.session_state.list_sort = "📈 ROAS"
-            cols = st.columns(len(sort_options))
-            for i, label in enumerate(sort_options):
-                with cols[i]:
-                    is_active = (st.session_state.list_sort == label)
-                    if st.button(
-                        label,
-                        key=f"sort_btn_{label}",
-                        type="primary" if is_active else "secondary",
-                        use_container_width=True,
-                    ):
-                        st.session_state.list_sort = label
-                        st.rerun()
-        with ctrl_r:
-            group_by_adset = st.toggle("📁 광고세트별 묶기", value=False)
+        if "list_sort" not in st.session_state:
+            st.session_state.list_sort = "📈 ROAS"
 
-        st.markdown("<div style='margin-bottom:0.8rem;'></div>", unsafe_allow_html=True)
+        st.markdown(
+            '<p style="font-size:0.72rem;color:#a1a1aa;margin:0 0 0.4rem 0;">세트 내 소재 정렬 기준</p>',
+            unsafe_allow_html=True
+        )
+        cols = st.columns(len(sort_options))
+        for i, label in enumerate(sort_options):
+            with cols[i]:
+                is_active = (st.session_state.list_sort == label)
+                if st.button(
+                    label,
+                    key=f"sort_btn_{label}",
+                    type="primary" if is_active else "secondary",
+                    use_container_width=True,
+                ):
+                    st.session_state.list_sort = label
+                    st.rerun()
+
+        st.markdown("<div style='margin-bottom:1rem;'></div>", unsafe_allow_html=True)
 
         col_key, asc, sort_label = sort_options[st.session_state.list_sort]
-        if group_by_adset:
-            render_adset_view(df)
-        else:
-            render_list(sort_df(df, col_key, asc), sort_label)
+        render_adset_view(df, col_key, asc, sort_label)
 
     with tab3:
         render_ai_analysis(df)
