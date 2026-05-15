@@ -61,7 +61,7 @@ def get_youtube_id(ad_name):
 st.set_page_config(page_title="LLS AD Dashboard", page_icon="🌿", layout="wide")
 
 # ── 로그인 ────────────────────────────────────────────────────
-def check_login():
+def # check_login():
     if "logged_in" not in st.session_state:
         st.session_state.logged_in = False
     if not st.session_state.logged_in:
