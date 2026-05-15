@@ -1133,13 +1133,9 @@ if st.session_state.df is not None:
 </div>""", unsafe_allow_html=True)
 
     # ── 탭 ────────────────────────────────────────────────────
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+    tab1, tab2, tab3 = st.tabs([
         "📊  Summary",
-        "📈  ROAS 높은순",
-        "💸  구매당비용 낮은순",
-        "🎯  CVR 높은순",
-        "💰  전환금액 높은순",
-        "📁  광고세트별",
+        "📋  소재 목록",
         "🤖  AI 분석",
     ])
 
@@ -1147,21 +1143,42 @@ if st.session_state.df is not None:
         render_summary(df)
 
     with tab2:
-        render_list(sort_df(df, "ROAS", False), "ROAS")
+        # 정렬 옵션 + 광고세트별 토글
+        sort_options = {
+            "📈 ROAS":       ("ROAS",        False, "ROAS"),
+            "💸 구매당비용":  ("구매당비용",   True,  "구매당비용"),
+            "🎯 CVR":        ("CVR(%)",       False, "CVR"),
+            "💰 전환금액":   ("구매전환금액",  False, "전환금액"),
+        }
+
+        ctrl_l, ctrl_r = st.columns([3, 1])
+        with ctrl_l:
+            if "list_sort" not in st.session_state:
+                st.session_state.list_sort = "📈 ROAS"
+            cols = st.columns(len(sort_options))
+            for i, label in enumerate(sort_options):
+                with cols[i]:
+                    is_active = (st.session_state.list_sort == label)
+                    if st.button(
+                        label,
+                        key=f"sort_btn_{label}",
+                        type="primary" if is_active else "secondary",
+                        use_container_width=True,
+                    ):
+                        st.session_state.list_sort = label
+                        st.rerun()
+        with ctrl_r:
+            group_by_adset = st.toggle("📁 광고세트별 묶기", value=False)
+
+        st.markdown("<div style='margin-bottom:0.8rem;'></div>", unsafe_allow_html=True)
+
+        col_key, asc, sort_label = sort_options[st.session_state.list_sort]
+        if group_by_adset:
+            render_adset_view(df)
+        else:
+            render_list(sort_df(df, col_key, asc), sort_label)
 
     with tab3:
-        render_list(sort_df(df, "구매당비용", True), "구매당비용")
-
-    with tab4:
-        render_list(sort_df(df, "CVR(%)", False), "CVR")
-
-    with tab5:
-        render_list(sort_df(df, "구매전환금액", False), "전환금액")
-
-    with tab6:
-        render_adset_view(df)
-
-    with tab7:
         render_ai_analysis(df)
 
     # ── CSV ───────────────────────────────────────────────────
