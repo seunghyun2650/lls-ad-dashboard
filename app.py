@@ -85,7 +85,7 @@ def check_login():
                     st.error("비밀번호가 틀렸습니다.")
         st.stop()
 
-check_login()
+# check_login()  # TEST 페이지 — 비밀번호 없음
 
 ACCESS_TOKEN = st.secrets["ACCESS_TOKEN"]
 AD_ACCOUNT_ID = st.secrets["AD_ACCOUNT_ID"]
