@@ -518,7 +518,7 @@ with col_logout:
 # ── 날짜 & 조회 ──────────────────────────────────────────────
 col1, col2, col3, col4 = st.columns([1, 1, 1, 1.5])
 with col1:
-    start_date = st.date_input("시작일", date.today() - timedelta(days=30))
+    start_date = st.date_input("시작일", date.today().replace(day=1))
 with col2:
     end_date = st.date_input("종료일", date.today())
 with col3:
@@ -974,6 +974,112 @@ if st.session_state.df is not None:
             render_list(sort_df(df_adset, col_key, asc), sort_label)
             st.markdown("<div style='margin-bottom:1.8rem;'></div>", unsafe_allow_html=True)
 
+    # ── 광고세트별 가로 보기 (칸반) ────────────────────────────
+    def render_adset_horizontal(df_all, col_key="ROAS", asc=False, sort_label="ROAS"):
+        adset_groups = list(df_all.groupby("광고세트"))
+        n = len(adset_groups)
+        if n == 0:
+            return
+        st_cols = st.columns(n)
+        for st_col, (adset_name, df_adset) in zip(st_cols, adset_groups):
+            with st_col:
+                adset_spend     = df_adset["비용"].sum()
+                adset_cv        = df_adset["구매전환금액"].sum()
+                adset_roas      = round(adset_cv / adset_spend, 2) if adset_spend > 0 else 0
+                adset_roas_pct  = f"{adset_roas * 100:.0f}%"
+                adset_purchases = int(df_adset["구매전환"].sum())
+                active_cnt      = int((df_adset["상태"] == "ACTIVE").sum())
+                border_clr      = "#16a34a" if adset_roas >= 1 else "#dc2626"
+                roas_clr        = "#16a34a" if adset_roas >= 1 else "#dc2626"
+
+                # 세트 헤더 카드
+                st.markdown(f"""
+<div style="background:#fff;border-radius:12px;padding:0.85rem;
+            margin-bottom:0.8rem;border:1px solid #e4e4e7;
+            border-top:3px solid {border_clr};
+            box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+  <div style="font-size:0.82rem;font-weight:700;color:#18181b;margin-bottom:0.6rem;
+              white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+       title="{adset_name}">{adset_name}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+    <div style="background:#f8fafc;border-radius:7px;padding:0.4rem;text-align:center;">
+      <div style="font-size:0.57rem;color:#a1a1aa;margin-bottom:0.1rem;">ROAS</div>
+      <div style="font-size:0.82rem;font-weight:700;color:{roas_clr};">{adset_roas_pct}</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:7px;padding:0.4rem;text-align:center;">
+      <div style="font-size:0.57rem;color:#a1a1aa;margin-bottom:0.1rem;">구매수</div>
+      <div style="font-size:0.82rem;font-weight:700;">{adset_purchases}건</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:7px;padding:0.4rem;text-align:center;">
+      <div style="font-size:0.57rem;color:#a1a1aa;margin-bottom:0.1rem;">광고비</div>
+      <div style="font-size:0.75rem;font-weight:700;">{adset_spend:,.0f}원</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:7px;padding:0.4rem;text-align:center;">
+      <div style="font-size:0.57rem;color:#a1a1aa;margin-bottom:0.1rem;">운영중</div>
+      <div style="font-size:0.82rem;font-weight:700;color:#15803d;">{active_cnt}개</div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+                # 소재 카드 목록
+                df_sorted  = sort_df(df_adset, col_key, asc)
+                cards_html = ""
+                for _, row in df_sorted.iterrows():
+                    roas_pct  = f"{row['ROAS']*100:.0f}%"
+                    rc        = "#16a34a" if row["ROAS"] >= 2 else ("#d97706" if row["ROAS"] >= 1 else "#dc2626")
+                    sp_cls    = "sp-active" if row["상태"] == "ACTIVE" else "sp-paused"
+                    sp_text   = "운영중" if row["상태"] == "ACTIVE" else "정지"
+                    spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
+
+                    yt_id = get_youtube_id(row["광고명"])
+                    if yt_id:
+                        fb  = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
+                        th  = f'<img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:cover;">'
+                    elif row["썸네일"]:
+                        th  = f'<img src="{row["썸네일"]}" style="width:100%;height:100%;object-fit:cover;">'
+                    else:
+                        lbl = "🎬" if row["영상여부"] else "—"
+                        th  = f'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#a1a1aa;">{lbl}</div>'
+
+                    cards_html += f"""
+<div style="background:#fff;border-radius:12px;overflow:hidden;
+            border:1px solid #f0f0f0;margin-bottom:8px;
+            box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+  <div style="position:relative;height:130px;background:#f4f4f5;overflow:hidden;">
+    {th}
+    <span class="status-pill {sp_cls}">{sp_text}</span>
+  </div>
+  <div style="padding:0.6rem 0.65rem;">
+    <div style="font-size:0.75rem;font-weight:700;color:#18181b;
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+                margin-bottom:0.45rem;" title="{row['광고명']}">{row['광고명']}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+      <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:6px;
+                  padding:0.3rem;text-align:center;">
+        <div style="font-size:0.55rem;color:#0284c7;font-weight:600;">ROAS</div>
+        <div style="font-size:0.78rem;font-weight:700;color:{rc};">{roas_pct}</div>
+      </div>
+      <div style="background:#fafaf9;border-radius:6px;padding:0.3rem;
+                  text-align:center;border:1px solid #f0f0f0;">
+        <div style="font-size:0.55rem;color:#a1a1aa;">구매당비용</div>
+        <div style="font-size:0.72rem;font-weight:700;">{spend_per}</div>
+      </div>
+      <div style="background:#fafaf9;border-radius:6px;padding:0.3rem;
+                  text-align:center;border:1px solid #f0f0f0;">
+        <div style="font-size:0.55rem;color:#a1a1aa;">광고비</div>
+        <div style="font-size:0.72rem;font-weight:700;">{row['비용']:,.0f}원</div>
+      </div>
+      <div style="background:#fafaf9;border-radius:6px;padding:0.3rem;
+                  text-align:center;border:1px solid #f0f0f0;">
+        <div style="font-size:0.55rem;color:#a1a1aa;">구매수</div>
+        <div style="font-size:0.72rem;font-weight:700;">{int(row['구매전환'])}건</div>
+      </div>
+    </div>
+  </div>
+</div>"""
+                st.markdown(cards_html, unsafe_allow_html=True)
+
     # ── AI 효율 분석 ───────────────────────────────────────────
     def render_ai_analysis(df_all):
         st.markdown('<p class="section-title">🤖 AI 광고 효율 분석</p>', unsafe_allow_html=True)
@@ -1174,7 +1280,7 @@ if st.session_state.df is not None:
         st.markdown("<div style='margin-bottom:1rem;'></div>", unsafe_allow_html=True)
 
         col_key, asc, sort_label = sort_options[st.session_state.list_sort]
-        render_adset_view(df, col_key, asc, sort_label)
+        render_adset_horizontal(df, col_key, asc, sort_label)
 
     with tab3:
         render_ai_analysis(df)
