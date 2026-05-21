@@ -1299,7 +1299,6 @@ if st.session_state.df is not None:
                     use_container_width=True,
                 ):
                     st.session_state.list_sort = label
-                    st.rerun()
 
         st.markdown("<div style='margin-bottom:1rem;'></div>", unsafe_allow_html=True)
 
