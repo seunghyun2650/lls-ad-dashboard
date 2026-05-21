@@ -1262,25 +1262,41 @@ if st.session_state.df is not None:
   </div>
 </div>""", unsafe_allow_html=True)
 
-    # ── 탭 ────────────────────────────────────────────────────
-    tab1, tab2, tab3 = st.tabs([
-        "📊  Summary",
-        "📋  소재 목록",
-        "🤖  AI 분석",
-    ])
+    # ── 네비게이션 (세션 스테이트로 탭 유지) ─────────────────────
+    if "active_tab" not in st.session_state:
+        st.session_state.active_tab = "summary"
 
-    with tab1:
+    nav_items = {
+        "summary": "📊  Summary",
+        "list":    "📋  소재 목록",
+        "ai":      "🤖  AI 분석",
+    }
+    nav_cols = st.columns(len(nav_items))
+    for col, (key, label) in zip(nav_cols, nav_items.items()):
+        with col:
+            is_active = (st.session_state.active_tab == key)
+            if st.button(
+                label,
+                key=f"nav_{key}",
+                type="primary" if is_active else "secondary",
+                use_container_width=True,
+            ):
+                st.session_state.active_tab = key
+
+    st.markdown("<div style='margin-top:1rem;border-top:1px solid #e4e4e7;padding-top:1.2rem;'></div>",
+                unsafe_allow_html=True)
+
+    # ── 컨텐츠 렌더링 ─────────────────────────────────────────
+    if st.session_state.active_tab == "summary":
         render_summary(df)
 
-    with tab2:
-        # 정렬 옵션 (광고세트 안에서 적용)
+    elif st.session_state.active_tab == "list":
         sort_options = {
             "📈 ROAS":      ("ROAS",        False, "ROAS"),
             "💸 구매당비용": ("구매당비용",   True,  "구매당비용"),
             "🎯 CVR":       ("CVR(%)",       False, "CVR"),
             "💰 전환금액":  ("구매전환금액",  False, "전환금액"),
         }
-
         if "list_sort" not in st.session_state:
             st.session_state.list_sort = "📈 ROAS"
 
@@ -1288,9 +1304,9 @@ if st.session_state.df is not None:
             '<p style="font-size:0.72rem;color:#a1a1aa;margin:0 0 0.4rem 0;">세트 내 소재 정렬 기준</p>',
             unsafe_allow_html=True
         )
-        cols = st.columns(len(sort_options))
+        sort_cols = st.columns(len(sort_options))
         for i, label in enumerate(sort_options):
-            with cols[i]:
+            with sort_cols[i]:
                 is_active = (st.session_state.list_sort == label)
                 if st.button(
                     label,
@@ -1301,11 +1317,10 @@ if st.session_state.df is not None:
                     st.session_state.list_sort = label
 
         st.markdown("<div style='margin-bottom:1rem;'></div>", unsafe_allow_html=True)
-
         col_key, asc, sort_label = sort_options[st.session_state.list_sort]
         render_adset_horizontal(df, col_key, asc, sort_label)
 
-    with tab3:
+    elif st.session_state.active_tab == "ai":
         render_ai_analysis(df)
 
     # ── CSV ───────────────────────────────────────────────────
