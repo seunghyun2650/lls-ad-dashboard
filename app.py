@@ -21,7 +21,8 @@ YOUTUBE_MAP = {
     "yongyoung":  "odUv2ZC06NQ",
     "ysh":        "7slrfAou8KE",
     "solseom":    "6KGIQBNj_1s",
-    "fav.things":  "eSGYCQQPSpA",
+    "fav.things":  "eS6YCQQPSpA",
+    "@fav.things": "eS6YCQQPSpA",
     "casa_de_oze": "CuURqAdbDJI",
     "멀티탭_a":    "Memt7hADi8U",
     "멀티탭_b":    "UyoT0y9NdHU",
@@ -982,6 +983,8 @@ if st.session_state.df is not None:
     # ── 광고세트별 가로 보기 (칸반) ────────────────────────────
     def render_adset_horizontal(df_all, col_key="ROAS", asc=False, sort_label="ROAS"):
         adset_groups = list(df_all.groupby("광고세트"))
+        # 운영중 소재 많은 세트 왼쪽, OFF 세트 오른쪽
+        adset_groups.sort(key=lambda x: (x[1]["상태"] == "ACTIVE").sum(), reverse=True)
         n = len(adset_groups)
         if n == 0:
             return
