@@ -21,6 +21,11 @@ YOUTUBE_MAP = {
     "yongyoung":  "odUv2ZC06NQ",
     "ysh":        "7slrfAou8KE",
     "solseom":    "6KGIQBNj_1s",
+    "fav.things":  "eSGYCQQPSpA",
+    "casa_de_oze": "CuURqAdbDJI",
+    "멀티탭_a":    "Memt7hADi8U",
+    "멀티탭_b":    "UyoT0y9NdHU",
+    "멀티탭_c":    "x8PYIpQYzA0",
 }
 
 def parse_youtube_id(url):
