@@ -998,31 +998,39 @@ if st.session_state.df is not None:
                 roas_clr        = "#16a34a" if adset_roas >= 1 else "#dc2626"
 
                 # 세트 헤더 카드
+                bg_clr   = "rgba(220,252,231,0.6)" if adset_roas >= 1 else "rgba(254,226,226,0.6)"
                 st.markdown(f"""
-<div style="background:#fff;border-radius:12px;padding:0.85rem;
-            margin-bottom:0.8rem;border:1px solid #e4e4e7;
-            border-top:3px solid {border_clr};
-            box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-  <div style="font-size:0.82rem;font-weight:700;color:#18181b;margin-bottom:0.6rem;
-              white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-       title="{adset_name}">{adset_name}</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-    <div style="background:#f8fafc;border-radius:7px;padding:0.4rem;text-align:center;">
-      <div style="font-size:0.57rem;color:#a1a1aa;margin-bottom:0.1rem;">ROAS</div>
-      <div style="font-size:0.82rem;font-weight:700;color:{roas_clr};">{adset_roas_pct}</div>
+<div style="background:{bg_clr};border-radius:14px;padding:1rem 1.1rem;
+            margin-bottom:0.9rem;border:2px solid {border_clr};
+            box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+  <div style="font-size:0.65rem;font-weight:600;color:{border_clr};
+              letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.25rem;">
+    📁 광고세트
+  </div>
+  <div style="font-size:0.88rem;font-weight:800;color:#18181b;
+              white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+              margin-bottom:0.75rem;" title="{adset_name}">{adset_name}</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;
+              background:rgba(255,255,255,0.7);border-radius:10px;
+              padding:0.6rem 0.8rem;margin-bottom:0.5rem;">
+    <div style="text-align:center;">
+      <div style="font-size:0.58rem;color:#71717a;margin-bottom:0.1rem;">ROAS</div>
+      <div style="font-size:1.3rem;font-weight:800;color:{roas_clr};line-height:1;">{adset_roas_pct}</div>
     </div>
-    <div style="background:#f8fafc;border-radius:7px;padding:0.4rem;text-align:center;">
-      <div style="font-size:0.57rem;color:#a1a1aa;margin-bottom:0.1rem;">구매수</div>
-      <div style="font-size:0.82rem;font-weight:700;">{adset_purchases}건</div>
+    <div style="width:1px;height:30px;background:#e4e4e7;"></div>
+    <div style="text-align:center;">
+      <div style="font-size:0.58rem;color:#71717a;margin-bottom:0.1rem;">구매수</div>
+      <div style="font-size:1.1rem;font-weight:800;color:#18181b;line-height:1;">{adset_purchases}건</div>
     </div>
-    <div style="background:#f8fafc;border-radius:7px;padding:0.4rem;text-align:center;">
-      <div style="font-size:0.57rem;color:#a1a1aa;margin-bottom:0.1rem;">광고비</div>
-      <div style="font-size:0.75rem;font-weight:700;">{adset_spend:,.0f}원</div>
+    <div style="width:1px;height:30px;background:#e4e4e7;"></div>
+    <div style="text-align:center;">
+      <div style="font-size:0.58rem;color:#71717a;margin-bottom:0.1rem;">운영중</div>
+      <div style="font-size:1.1rem;font-weight:800;color:#15803d;line-height:1;">{active_cnt}개</div>
     </div>
-    <div style="background:#f8fafc;border-radius:7px;padding:0.4rem;text-align:center;">
-      <div style="font-size:0.57rem;color:#a1a1aa;margin-bottom:0.1rem;">운영중</div>
-      <div style="font-size:0.82rem;font-weight:700;color:#15803d;">{active_cnt}개</div>
-    </div>
+  </div>
+  <div style="font-size:0.72rem;color:#71717a;text-align:right;">
+    광고비 <strong style="color:#18181b;">{adset_spend:,.0f}원</strong>
+    &nbsp;·&nbsp; 소재 <strong style="color:#18181b;">{len(df_adset)}개</strong>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1036,6 +1044,24 @@ if st.session_state.df is not None:
                     sp_cls    = "sp-active" if row["상태"] == "ACTIVE" else "sp-paused"
                     sp_text   = "운영중" if row["상태"] == "ACTIVE" else "정지"
                     spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
+
+                    # 정렬 기준에 따라 강조 지표 동적 결정
+                    primary_map = {
+                        "ROAS":     ("ROAS",     roas_pct,                        rc),
+                        "구매당비용": ("구매당비용", spend_per,                       "#18181b"),
+                        "CVR":      ("CVR",      f"{row['CVR(%)']}%",             "#18181b"),
+                        "전환금액":  ("전환금액",  f"{row['구매전환금액']:,.0f}원",   "#18181b"),
+                    }
+                    p_lbl, p_val, p_clr = primary_map.get(sort_label, ("ROAS", roas_pct, rc))
+
+                    # 나머지 3개 보조 지표 (기준 제외)
+                    all_sec = [
+                        ("ROAS",     roas_pct,                      rc),
+                        ("구매당비용", spend_per,                     "#18181b"),
+                        ("광고비",   f"{row['비용']:,.0f}원",          "#18181b"),
+                        ("구매수",   f"{int(row['구매전환'])}건",       "#18181b"),
+                    ]
+                    sec = [m for m in all_sec if m[0] != p_lbl][:3]
 
                     yt_id = get_youtube_id(row["광고명"])
                     if yt_id:
@@ -1061,25 +1087,15 @@ if st.session_state.df is not None:
                 margin-bottom:0.45rem;" title="{row['광고명']}">{row['광고명']}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
       <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:6px;
-                  padding:0.3rem;text-align:center;">
-        <div style="font-size:0.55rem;color:#0284c7;font-weight:600;">ROAS</div>
-        <div style="font-size:0.78rem;font-weight:700;color:{rc};">{roas_pct}</div>
+                  padding:0.35rem;text-align:center;grid-column:span 2;">
+        <div style="font-size:0.55rem;color:#0284c7;font-weight:700;">{p_lbl}</div>
+        <div style="font-size:0.88rem;font-weight:700;color:{p_clr};">{p_val}</div>
       </div>
-      <div style="background:#fafaf9;border-radius:6px;padding:0.3rem;
+      {''.join(f"""<div style="background:#fafaf9;border-radius:6px;padding:0.3rem;
                   text-align:center;border:1px solid #f0f0f0;">
-        <div style="font-size:0.55rem;color:#a1a1aa;">구매당비용</div>
-        <div style="font-size:0.72rem;font-weight:700;">{spend_per}</div>
-      </div>
-      <div style="background:#fafaf9;border-radius:6px;padding:0.3rem;
-                  text-align:center;border:1px solid #f0f0f0;">
-        <div style="font-size:0.55rem;color:#a1a1aa;">광고비</div>
-        <div style="font-size:0.72rem;font-weight:700;">{row['비용']:,.0f}원</div>
-      </div>
-      <div style="background:#fafaf9;border-radius:6px;padding:0.3rem;
-                  text-align:center;border:1px solid #f0f0f0;">
-        <div style="font-size:0.55rem;color:#a1a1aa;">구매수</div>
-        <div style="font-size:0.72rem;font-weight:700;">{int(row['구매전환'])}건</div>
-      </div>
+        <div style="font-size:0.55rem;color:#a1a1aa;">{m[0]}</div>
+        <div style="font-size:0.72rem;font-weight:700;color:{m[2]};">{m[1]}</div>
+      </div>""" for m in sec)}
     </div>
   </div>
 </div>"""
