@@ -27,6 +27,9 @@ YOUTUBE_MAP = {
     "멀티탭_a":    "Memt7hADi8U",
     "멀티탭_b":    "UyoT0y9NdHU",
     "멀티탭_c":    "x8PYIpQYzA0",
+    "dahyunjae":   "Zh6qo1DdFew",
+    "@dahyunjae":  "Zh6qo1DdFew",
+    "구일이":      "Nn84wnsQssQ",
 }
 
 def parse_youtube_id(url):
