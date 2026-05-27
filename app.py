@@ -565,6 +565,8 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
         AdsInsights.Field.ad_name,
         AdsInsights.Field.adset_id,
         AdsInsights.Field.adset_name,
+        AdsInsights.Field.campaign_id,
+        AdsInsights.Field.campaign_name,
         AdsInsights.Field.spend,
         AdsInsights.Field.impressions,
         AdsInsights.Field.clicks,
@@ -644,6 +646,7 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
             "ad_status":   ad_info.get("status", ""),
             "썸네일":      thumbnail_url,
             "영상여부":     is_video,
+            "캠페인":      str(data.get("campaign_name", "")),
             "광고명":      str(data.get("ad_name", "")),
             "광고세트":     str(data.get("adset_name", "")),
             "상태":        status,
@@ -1303,6 +1306,35 @@ if st.session_state.df is not None:
         if "list_sort" not in st.session_state:
             st.session_state.list_sort = "📈 ROAS"
 
+        # ── 캠페인 필터 ──────────────────────────────────────────
+        campaign_list = sorted(df["캠페인"].dropna().unique().tolist())
+        if "selected_campaign" not in st.session_state or st.session_state.selected_campaign not in campaign_list:
+            st.session_state.selected_campaign = campaign_list[0] if campaign_list else None
+
+        if len(campaign_list) > 1:
+            st.markdown(
+                '<p style="font-size:0.72rem;color:#a1a1aa;margin:0 0 0.3rem 0;">캠페인 선택</p>',
+                unsafe_allow_html=True
+            )
+            camp_cols = st.columns(len(campaign_list))
+            for i, camp in enumerate(campaign_list):
+                with camp_cols[i]:
+                    is_sel = (st.session_state.selected_campaign == camp)
+                    # 짧게 표시 (앞 15자)
+                    short_name = camp[:15] + "…" if len(camp) > 15 else camp
+                    if st.button(
+                        short_name,
+                        key=f"camp_btn_{i}",
+                        type="primary" if is_sel else "secondary",
+                        use_container_width=True,
+                        help=camp,
+                    ):
+                        st.session_state.selected_campaign = camp
+            st.markdown("<div style='margin-bottom:0.5rem;'></div>", unsafe_allow_html=True)
+
+        # 선택된 캠페인으로 필터링
+        df_filtered = df[df["캠페인"] == st.session_state.selected_campaign] if st.session_state.selected_campaign else df
+
         st.markdown(
             '<p style="font-size:0.72rem;color:#a1a1aa;margin:0 0 0.4rem 0;">세트 내 소재 정렬 기준</p>',
             unsafe_allow_html=True
@@ -1321,7 +1353,7 @@ if st.session_state.df is not None:
 
         st.markdown("<div style='margin-bottom:1rem;'></div>", unsafe_allow_html=True)
         col_key, asc, sort_label = sort_options[st.session_state.list_sort]
-        render_adset_horizontal(df, col_key, asc, sort_label)
+        render_adset_horizontal(df_filtered, col_key, asc, sort_label)
 
     elif st.session_state.active_tab == "ai":
         render_ai_analysis(df)
