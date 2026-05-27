@@ -987,6 +987,7 @@ if st.session_state.df is not None:
             st.markdown("<div style='margin-bottom:1.8rem;'></div>", unsafe_allow_html=True)
 
     # ── 광고세트별 가로 보기 (칸반) ────────────────────────────
+    MAX_COLS = 5  # 한 줄에 최대 광고세트 수
     def render_adset_horizontal(df_all, col_key="ROAS", asc=False, sort_label="ROAS"):
         adset_groups = list(df_all.groupby("광고세트"))
         # 운영중 소재 많은 세트 왼쪽, OFF 세트 오른쪽
@@ -994,21 +995,24 @@ if st.session_state.df is not None:
         n = len(adset_groups)
         if n == 0:
             return
-        st_cols = st.columns(n)
-        for st_col, (adset_name, df_adset) in zip(st_cols, adset_groups):
-            with st_col:
-                adset_spend     = df_adset["비용"].sum()
-                adset_cv        = df_adset["구매전환금액"].sum()
-                adset_roas      = round(adset_cv / adset_spend, 2) if adset_spend > 0 else 0
-                adset_roas_pct  = f"{adset_roas * 100:.0f}%"
-                adset_purchases = int(df_adset["구매전환"].sum())
-                active_cnt      = int((df_adset["상태"] == "ACTIVE").sum())
-                border_clr      = "#16a34a" if adset_roas >= 1 else "#dc2626"
-                roas_clr        = "#16a34a" if adset_roas >= 1 else "#dc2626"
+        # MAX_COLS 단위로 행 분할
+        for row_start in range(0, n, MAX_COLS):
+            row_groups = adset_groups[row_start:row_start + MAX_COLS]
+            st_cols = st.columns(len(row_groups))
+            for st_col, (adset_name, df_adset) in zip(st_cols, row_groups):
+                with st_col:
+                    adset_spend     = df_adset["비용"].sum()
+                    adset_cv        = df_adset["구매전환금액"].sum()
+                    adset_roas      = round(adset_cv / adset_spend, 2) if adset_spend > 0 else 0
+                    adset_roas_pct  = f"{adset_roas * 100:.0f}%"
+                    adset_purchases = int(df_adset["구매전환"].sum())
+                    active_cnt      = int((df_adset["상태"] == "ACTIVE").sum())
+                    border_clr      = "#16a34a" if adset_roas >= 1 else "#dc2626"
+                    roas_clr        = "#16a34a" if adset_roas >= 1 else "#dc2626"
 
-                # 세트 헤더 카드
-                bg_clr   = "rgba(220,252,231,0.6)" if adset_roas >= 1 else "rgba(254,226,226,0.6)"
-                st.markdown(f"""
+                    # 세트 헤더 카드
+                    bg_clr   = "rgba(220,252,231,0.6)" if adset_roas >= 1 else "rgba(254,226,226,0.6)"
+                    st.markdown(f"""
 <div style="background:{bg_clr};border-radius:14px;padding:1rem 1.1rem;
             margin-bottom:0.9rem;border:2px solid {border_clr};
             box-shadow:0 2px 8px rgba(0,0,0,0.08);">
@@ -1044,45 +1048,45 @@ if st.session_state.df is not None:
 </div>
 """, unsafe_allow_html=True)
 
-                # 소재 카드 목록
-                df_sorted  = sort_df(df_adset, col_key, asc)
-                cards_html = ""
-                for _, row in df_sorted.iterrows():
-                    roas_pct  = f"{row['ROAS']*100:.0f}%"
-                    rc        = "#16a34a" if row["ROAS"] >= 2 else ("#d97706" if row["ROAS"] >= 1 else "#dc2626")
-                    sp_cls    = "sp-active" if row["상태"] == "ACTIVE" else "sp-paused"
-                    sp_text   = "운영중" if row["상태"] == "ACTIVE" else "정지"
-                    spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
+                    # 소재 카드 목록
+                    df_sorted  = sort_df(df_adset, col_key, asc)
+                    cards_html = ""
+                    for _, row in df_sorted.iterrows():
+                        roas_pct  = f"{row['ROAS']*100:.0f}%"
+                        rc        = "#16a34a" if row["ROAS"] >= 2 else ("#d97706" if row["ROAS"] >= 1 else "#dc2626")
+                        sp_cls    = "sp-active" if row["상태"] == "ACTIVE" else "sp-paused"
+                        sp_text   = "운영중" if row["상태"] == "ACTIVE" else "정지"
+                        spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
 
-                    # 정렬 기준에 따라 강조 지표 동적 결정
-                    primary_map = {
-                        "ROAS":     ("ROAS",     roas_pct,                        rc),
-                        "구매당비용": ("구매당비용", spend_per,                       "#18181b"),
-                        "CVR":      ("CVR",      f"{row['CVR(%)']}%",             "#18181b"),
-                        "전환금액":  ("전환금액",  f"{row['구매전환금액']:,.0f}원",   "#18181b"),
-                    }
-                    p_lbl, p_val, p_clr = primary_map.get(sort_label, ("ROAS", roas_pct, rc))
+                        # 정렬 기준에 따라 강조 지표 동적 결정
+                        primary_map = {
+                            "ROAS":     ("ROAS",     roas_pct,                        rc),
+                            "구매당비용": ("구매당비용", spend_per,                       "#18181b"),
+                            "CVR":      ("CVR",      f"{row['CVR(%)']}%",             "#18181b"),
+                            "전환금액":  ("전환금액",  f"{row['구매전환금액']:,.0f}원",   "#18181b"),
+                        }
+                        p_lbl, p_val, p_clr = primary_map.get(sort_label, ("ROAS", roas_pct, rc))
 
-                    # 나머지 3개 보조 지표 (기준 제외)
-                    all_sec = [
-                        ("ROAS",     roas_pct,                      rc),
-                        ("구매당비용", spend_per,                     "#18181b"),
-                        ("광고비",   f"{row['비용']:,.0f}원",          "#18181b"),
-                        ("구매수",   f"{int(row['구매전환'])}건",       "#18181b"),
-                    ]
-                    sec = [m for m in all_sec if m[0] != p_lbl][:3]
+                        # 나머지 3개 보조 지표 (기준 제외)
+                        all_sec = [
+                            ("ROAS",     roas_pct,                      rc),
+                            ("구매당비용", spend_per,                     "#18181b"),
+                            ("광고비",   f"{row['비용']:,.0f}원",          "#18181b"),
+                            ("구매수",   f"{int(row['구매전환'])}건",       "#18181b"),
+                        ]
+                        sec = [m for m in all_sec if m[0] != p_lbl][:3]
 
-                    yt_id = get_youtube_id(row["광고명"])
-                    if yt_id:
-                        fb  = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
-                        th  = f'<img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:cover;">'
-                    elif row["썸네일"]:
-                        th  = f'<img src="{row["썸네일"]}" style="width:100%;height:100%;object-fit:cover;">'
-                    else:
-                        lbl = "🎬" if row["영상여부"] else "—"
-                        th  = f'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#a1a1aa;">{lbl}</div>'
+                        yt_id = get_youtube_id(row["광고명"])
+                        if yt_id:
+                            fb  = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
+                            th  = f'<img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:cover;">'
+                        elif row["썸네일"]:
+                            th  = f'<img src="{row["썸네일"]}" style="width:100%;height:100%;object-fit:cover;">'
+                        else:
+                            lbl = "🎬" if row["영상여부"] else "—"
+                            th  = f'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#a1a1aa;">{lbl}</div>'
 
-                    cards_html += f"""
+                        cards_html += f"""
 <div style="background:#fff;border-radius:12px;overflow:hidden;
             border:1px solid #f0f0f0;margin-bottom:8px;
             box-shadow:0 1px 3px rgba(0,0,0,0.05);">
@@ -1108,7 +1112,11 @@ if st.session_state.df is not None:
     </div>
   </div>
 </div>"""
-                st.markdown(cards_html, unsafe_allow_html=True)
+                    st.markdown(cards_html, unsafe_allow_html=True)
+            # 행 사이 구분선
+            if row_start + MAX_COLS < n:
+                st.markdown("<hr style='border:none;border-top:1px solid #e4e4e7;margin:1.5rem 0;'>",
+                            unsafe_allow_html=True)
 
     # ── AI 효율 분석 ───────────────────────────────────────────
     def render_ai_analysis(df_all):
