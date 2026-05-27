@@ -1142,19 +1142,29 @@ if st.session_state.df is not None:
             if row["ROAS"] >= 1.0: return "양호", "#d97706", "🟡"
             return "저조", "#dc2626", "🔴"
 
-        # 끄기 제안: 운영중 + ROAS < 1.0 + 의미 있는 비용
+        CPO_LIMIT = 79000  # 구매당비용 상한 (3구소켓 기준)
+
+        # 끄기 제안: 운영중 + (ROAS < 1.0 OR 구매당비용 > 상한) + 의미 있는 비용
         avg_spend = df_a["비용"].mean()
+        min_spend = max(avg_spend * 0.3, 5000)
         turn_off = df_a[
             (df_a["상태"] == "ACTIVE") &
-            (df_a["ROAS"] < 1.0) &
-            (df_a["비용"] >= max(avg_spend * 0.3, 5000))
+            (df_a["비용"] >= min_spend) &
+            (
+                (df_a["ROAS"] < 1.0) |
+                (
+                    (df_a["구매전환"] >= 1) &
+                    (df_a["구매당비용"] > CPO_LIMIT)
+                )
+            )
         ]
-        # 켜기 제안: 정지 상태 + ROAS >= 1.5 + 구매 1건 이상
+        # 켜기 제안: 정지 상태 + ROAS >= 1.5 + 구매당비용 <= 상한 + 구매 1건 이상
         paused_mask = ~df_a["상태"].isin(["ACTIVE"])
         turn_on = df_a[
             paused_mask &
             (df_a["ROAS"] >= 1.5) &
-            (df_a["구매전환"] >= 1)
+            (df_a["구매전환"] >= 1) &
+            (df_a["구매당비용"] <= CPO_LIMIT)
         ]
 
         # 요약 카드
@@ -1206,7 +1216,7 @@ if st.session_state.df is not None:
         # 끄기 제안 섹션
         if len(turn_off) > 0:
             st.markdown(f'<p class="section-title">🔴 끄기 제안 — {len(turn_off)}개 소재</p>', unsafe_allow_html=True)
-            st.markdown('<p class="section-sub">운영 중이지만 ROAS가 낮아 비용이 낭비되고 있는 소재입니다.</p>', unsafe_allow_html=True)
+            st.markdown('<p class="section-sub">운영 중이지만 ROAS가 낮거나 구매당비용이 79,000원을 초과하는 소재입니다.</p>', unsafe_allow_html=True)
             for _, row in turn_off.iterrows():
                 col_card, col_btn = st.columns([6, 1])
                 with col_card:
@@ -1228,7 +1238,7 @@ if st.session_state.df is not None:
         # 켜기 제안 섹션
         if len(turn_on) > 0:
             st.markdown(f'<p class="section-title" style="margin-top:1.2rem;">🟢 켜기 제안 — {len(turn_on)}개 소재</p>', unsafe_allow_html=True)
-            st.markdown('<p class="section-sub">현재 정지 상태지만 과거 성과가 좋았던 소재입니다.</p>', unsafe_allow_html=True)
+            st.markdown('<p class="section-sub">정지 상태지만 ROAS 150% 이상 + 구매당비용 79,000원 이하로 성과가 검증된 소재입니다.</p>', unsafe_allow_html=True)
             for _, row in turn_on.iterrows():
                 col_card, col_btn = st.columns([6, 1])
                 with col_card:
