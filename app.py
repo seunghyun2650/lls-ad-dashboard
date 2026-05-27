@@ -1230,7 +1230,11 @@ if st.session_state.df is not None:
                                            type="primary", use_container_width=True):
                         res = toggle_ad_status(ad_id, "PAUSED")
                         if res is True:
-                            st.success("정지됨!")
+                            for _df_key in ("df_ai", "df"):
+                                if _df_key in st.session_state:
+                                    st.session_state[_df_key].loc[
+                                        st.session_state[_df_key]["ad_id"] == ad_id, "상태"
+                                    ] = "PAUSED"
                             fetch_ad_data.clear()
                             st.rerun()
                         else:
@@ -1252,7 +1256,11 @@ if st.session_state.df is not None:
                                            use_container_width=True):
                         res = toggle_ad_status(ad_id, "ACTIVE")
                         if res is True:
-                            st.success("활성화!")
+                            for _df_key in ("df_ai", "df"):
+                                if _df_key in st.session_state:
+                                    st.session_state[_df_key].loc[
+                                        st.session_state[_df_key]["ad_id"] == ad_id, "상태"
+                                    ] = "ACTIVE"
                             fetch_ad_data.clear()
                             st.rerun()
                         else:
