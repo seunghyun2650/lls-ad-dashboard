@@ -1119,10 +1119,12 @@ if st.session_state.df is not None:
                             unsafe_allow_html=True)
 
     # ── AI 효율 분석 ───────────────────────────────────────────
-    def render_ai_analysis(df_all):
+    def render_ai_analysis(df_all, ai_start_str="", ai_end_str=""):
         st.markdown('<p class="section-title">🤖 AI 광고 효율 분석</p>', unsafe_allow_html=True)
+        period_txt = f"{ai_start_str} ~ {ai_end_str} (최근 28일)" if ai_start_str else ""
         st.markdown(
-            '<p class="section-sub">ROAS 1순위 · 구매당비용 2순위 기준 · OFF 소재 포함 분석</p>',
+            f'<p class="section-sub">ROAS 1순위 · 구매당비용 2순위 기준 · OFF 소재 포함 분석'
+            f'{"  |  🗓 " + period_txt if period_txt else ""}</p>',
             unsafe_allow_html=True
         )
 
@@ -1374,7 +1376,30 @@ if st.session_state.df is not None:
         render_adset_horizontal(df_filtered, col_key, asc, sort_label)
 
     elif st.session_state.active_tab == "ai":
-        render_ai_analysis(df)
+        # AI 분석은 항상 최근 28일 데이터 사용
+        ai_end   = date.today()
+        ai_start = ai_end - timedelta(days=27)  # 오늘 포함 28일
+        ai_start_str = str(ai_start)
+        ai_end_str   = str(ai_end)
+
+        # 날짜가 바뀌면 캐시 무효화
+        if st.session_state.get("ai_date_range") != (ai_start_str, ai_end_str):
+            st.session_state.pop("df_ai", None)
+            st.session_state.ai_date_range = (ai_start_str, ai_end_str)
+
+        if "df_ai" not in st.session_state:
+            with st.spinner("AI 분석용 데이터 조회 중 (최근 28일)..."):
+                try:
+                    ai_rows = fetch_ad_data(
+                        ai_start_str, ai_end_str,
+                        ACCESS_TOKEN, AD_ACCOUNT_ID, APP_ID, APP_SECRET
+                    )
+                    st.session_state.df_ai = pd.DataFrame(ai_rows)
+                except Exception as e:
+                    st.error(f"AI 분석 데이터 오류: {e}")
+                    st.session_state.df_ai = df.copy()
+
+        render_ai_analysis(st.session_state.df_ai, ai_start_str, ai_end_str)
 
     # ── CSV ───────────────────────────────────────────────────
     st.markdown("<div style='margin-top:1.5rem;'></div>", unsafe_allow_html=True)
