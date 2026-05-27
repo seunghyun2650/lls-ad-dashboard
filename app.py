@@ -1232,10 +1232,9 @@ if st.session_state.df is not None:
                         if res is True:
                             for _df_key in ("df_ai", "df"):
                                 if _df_key in st.session_state:
-                                    st.session_state[_df_key].loc[
-                                        st.session_state[_df_key]["ad_id"] == ad_id, "상태"
-                                    ] = "PAUSED"
-                            fetch_ad_data.clear()
+                                    _tmp = st.session_state[_df_key].copy()
+                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
+                                    st.session_state[_df_key] = _tmp
                             st.rerun()
                         else:
                             st.error(f"오류: {res}")
@@ -1258,10 +1257,9 @@ if st.session_state.df is not None:
                         if res is True:
                             for _df_key in ("df_ai", "df"):
                                 if _df_key in st.session_state:
-                                    st.session_state[_df_key].loc[
-                                        st.session_state[_df_key]["ad_id"] == ad_id, "상태"
-                                    ] = "ACTIVE"
-                            fetch_ad_data.clear()
+                                    _tmp = st.session_state[_df_key].copy()
+                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
+                                    st.session_state[_df_key] = _tmp
                             st.rerun()
                         else:
                             st.error(f"오류: {res}")
