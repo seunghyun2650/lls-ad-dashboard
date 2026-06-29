@@ -499,14 +499,6 @@ def toggle_ad_status(ad_id, new_status):
     #     return str(e)
     return True  # TEST 모드: 항상 성공으로 처리
 
-# ── TEST 배너 ─────────────────────────────────────────────────
-st.markdown("""
-<div style="background:#ef4444;color:white;text-align:center;
-            padding:0.6rem;border-radius:10px;margin-bottom:1rem;
-            font-weight:700;font-size:0.95rem;letter-spacing:0.05em;">
-    🚧 TEST 페이지 — 실제 운영 사이트가 아닙니다
-</div>
-""", unsafe_allow_html=True)
 
 # ── 헤더 ─────────────────────────────────────────────────────
 col_title, col_logout = st.columns([8, 1])
