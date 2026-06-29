@@ -1071,9 +1071,9 @@ if st.session_state.df is not None:
                         yt_id = get_youtube_id(row["광고명"])
                         if yt_id:
                             fb  = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
-                            th  = f'<img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:cover;">'
+                            th  = f'<img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:contain;">'
                         elif row["썸네일"]:
-                            th  = f'<img src="{row["썸네일"]}" style="width:100%;height:100%;object-fit:cover;">'
+                            th  = f'<img src="{row["썸네일"]}" style="width:100%;height:100%;object-fit:contain;">'
                         else:
                             lbl = "🎬" if row["영상여부"] else "—"
                             th  = f'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#a1a1aa;">{lbl}</div>'
@@ -1082,7 +1082,7 @@ if st.session_state.df is not None:
 <div style="background:#fff;border-radius:12px;overflow:hidden;
             border:1px solid #f0f0f0;margin-bottom:8px;
             box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-  <div style="position:relative;height:130px;background:#f4f4f5;overflow:hidden;">
+  <div style="position:relative;height:200px;background:#18181b;overflow:hidden;">
     {th}
     <span class="status-pill {sp_cls}">{sp_text}</span>
   </div>
