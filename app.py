@@ -579,7 +579,7 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
     try:
         ads_cursor = account.get_ads(fields=[
             "id", "status", "effective_status", "created_time",
-            "creative{thumbnail_url,image_url,video_id}",
+            "creative{thumbnail_url,image_url,video_id,instagram_permalink_url}",
         ], params={"limit": 200})
         for ad_item in ads_cursor:
             raw = dict(ad_item)
@@ -588,12 +588,13 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
             creative_raw = raw.get("creative", {})
             creative = dict(creative_raw) if creative_raw else {}
             ad_cache[ad_id] = {
-                "status":           str(raw.get("status", "")),
-                "effective_status": str(raw.get("effective_status", "")),
-                "created_time":     str(raw.get("created_time", "")),
-                "thumbnail_url":    str(creative.get("thumbnail_url", "")),
-                "image_url":        str(creative.get("image_url", "")),
-                "video_id":         str(creative.get("video_id", "")),
+                "status":                str(raw.get("status", "")),
+                "effective_status":      str(raw.get("effective_status", "")),
+                "created_time":          str(raw.get("created_time", "")),
+                "thumbnail_url":         str(creative.get("thumbnail_url", "")),
+                "image_url":             str(creative.get("image_url", "")),
+                "video_id":              str(creative.get("video_id", "")),
+                "instagram_permalink_url": str(creative.get("instagram_permalink_url", "")),
             }
     except Exception:
         pass
@@ -634,11 +635,12 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
                 thumbnail_url = ad_info["image_url"] or ad_info["thumbnail_url"]
 
         rows.append({
-            "ad_id":       ad_id,
-            "ad_status":   ad_info.get("status", ""),
-            "썸네일":      thumbnail_url,
-            "영상여부":     is_video,
-            "캠페인":      str(data.get("campaign_name", "")),
+            "ad_id":          ad_id,
+            "ad_status":      ad_info.get("status", ""),
+            "썸네일":         thumbnail_url,
+            "instagram_url":  ad_info.get("instagram_permalink_url", ""),
+            "영상여부":        is_video,
+            "캠페인":         str(data.get("campaign_name", "")),
             "광고명":      str(data.get("ad_name", "")),
             "광고세트":     str(data.get("adset_name", "")),
             "상태":        status,
@@ -1069,11 +1071,14 @@ if st.session_state.df is not None:
                         sec = [m for m in all_sec if m[0] != p_lbl][:3]
 
                         yt_id = get_youtube_id(row["광고명"])
+                        ig_url = row.get("instagram_url", "")
                         if yt_id:
-                            fb  = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
-                            th  = f'<img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:contain;">'
+                            fb      = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
+                            yt_link = f"https://www.youtube.com/shorts/{yt_id}"
+                            th  = f'<a href="{yt_link}" target="_blank" style="display:block;width:100%;height:100%;"><img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:contain;"></a>'
                         elif row["썸네일"]:
-                            th  = f'<img src="{row["썸네일"]}" style="width:100%;height:100%;object-fit:contain;">'
+                            img = f'<img src="{row["썸네일"]}" style="width:100%;height:100%;object-fit:contain;">'
+                            th  = f'<a href="{ig_url}" target="_blank" style="display:block;width:100%;height:100%;">{img}</a>' if ig_url else img
                         else:
                             lbl = "🎬" if row["영상여부"] else "—"
                             th  = f'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#a1a1aa;">{lbl}</div>'
@@ -1401,5 +1406,5 @@ if st.session_state.df is not None:
 
     # ── CSV ───────────────────────────────────────────────────
     st.markdown("<div style='margin-top:1.5rem;'></div>", unsafe_allow_html=True)
-    csv = df.drop(columns=["썸네일", "영상여부", "ad_id", "ad_status"], errors="ignore").to_csv(index=False).encode("utf-8-sig")
+    csv = df.drop(columns=["썸네일", "영상여부", "ad_id", "ad_status", "instagram_url"], errors="ignore").to_csv(index=False).encode("utf-8-sig")
     st.download_button("📥 CSV 다운로드", csv, "ad_performance.csv", "text/csv")
