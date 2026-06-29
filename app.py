@@ -458,12 +458,13 @@ div[data-testid="column"]:last-child .stButton > button {
 
 # ── 광고 ON/OFF API ───────────────────────────────────────────
 def toggle_ad_status(ad_id, new_status):
-    """Meta API로 광고 상태 변경 (ACTIVE / PAUSED)"""
     try:
-        FacebookAdsApi.init(APP_ID, APP_SECRET, ACCESS_TOKEN)
-        ad = Ad(ad_id)
-        ad[Ad.Field.status] = new_status
-        ad.remote_update()  # 실제로 Meta에 상태 변경 요청을 보내는 코드
+        import requests
+        url = f"https://graph.facebook.com/v19.0/{ad_id}"
+        resp = requests.post(url, data={"status": new_status, "access_token": ACCESS_TOKEN})
+        result = resp.json()
+        if "error" in result:
+            return result["error"].get("message", str(result["error"]))
         return True
     except Exception as e:
         return str(e)
