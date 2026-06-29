@@ -458,18 +458,15 @@ div[data-testid="column"]:last-child .stButton > button {
 
 # ── 광고 ON/OFF API ───────────────────────────────────────────
 def toggle_ad_status(ad_id, new_status):
-    """Meta API로 광고 상태 변경 (ACTIVE / PAUSED)
-    ⚠️ TEST 모드: 실제 API 호출 비활성화 — main 배포 시 주석 해제"""
-    # TODO: main 배포 전 아래 주석 해제
-    # try:
-    #     FacebookAdsApi.init(APP_ID, APP_SECRET, ACCESS_TOKEN)
-    #     ad = Ad(ad_id)
-    #     ad[Ad.Field.status] = new_status
-    #     ad.remote_update()
-    #     return True
-    # except Exception as e:
-    #     return str(e)
-    return True  # TEST 모드: 항상 성공으로 처리
+    """Meta API로 광고 상태 변경 (ACTIVE / PAUSED)"""
+    try:
+        FacebookAdsApi.init(APP_ID, APP_SECRET, ACCESS_TOKEN)
+        ad = Ad(ad_id)
+        ad[Ad.Field.status] = new_status
+        ad.remote_update()  # 실제로 Meta에 상태 변경 요청을 보내는 코드
+        return True
+    except Exception as e:
+        return str(e)
 
 
 # ── 헤더 ─────────────────────────────────────────────────────
