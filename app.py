@@ -1181,24 +1181,49 @@ if st.session_state.df is not None:
             st.markdown(f'<p class="section-title">🔴 끄기 제안 — {len(turn_off)}개 소재</p>', unsafe_allow_html=True)
             st.markdown('<p class="section-sub">운영 중이지만 ROAS가 낮거나 구매당비용이 79,000원을 초과하는 소재입니다.</p>', unsafe_allow_html=True)
             for _, row in turn_off.iterrows():
+                ad_id = str(row.get("ad_id", ""))
+                # 세션에서 현재 상태 가져오기 (버튼 누른 후 즉시 반영)
+                current_status = row.get("상태", "ACTIVE")
+                for _df_key in ("df_ai", "df"):
+                    if _df_key in st.session_state:
+                        _match = st.session_state[_df_key][st.session_state[_df_key]["ad_id"] == ad_id]
+                        if not _match.empty:
+                            current_status = _match.iloc[0]["상태"]
+                            break
+
                 col_card, col_btn = st.columns([6, 1])
                 with col_card:
-                    st.markdown(ad_row_html(row, "#fecaca"), unsafe_allow_html=True)
+                    border = "#fecaca" if current_status == "ACTIVE" else "#bbf7d0"
+                    st.markdown(ad_row_html(row, border), unsafe_allow_html=True)
                 with col_btn:
                     st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
-                    ad_id = str(row.get("ad_id", ""))
-                    if ad_id and st.button("⏸ 끄기", key=f"off_{ad_id}",
-                                           type="primary", use_container_width=True):
-                        res = toggle_ad_status(ad_id, "PAUSED")
-                        if res is True:
-                            for _df_key in ("df_ai", "df"):
-                                if _df_key in st.session_state:
-                                    _tmp = st.session_state[_df_key].copy()
-                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
-                                    st.session_state[_df_key] = _tmp
-                            st.rerun()
+                    if ad_id:
+                        if current_status == "ACTIVE":
+                            if st.button("OFF", key=f"off_{ad_id}",
+                                         type="primary", use_container_width=True):
+                                res = toggle_ad_status(ad_id, "PAUSED")
+                                if res is True:
+                                    for _df_key in ("df_ai", "df"):
+                                        if _df_key in st.session_state:
+                                            _tmp = st.session_state[_df_key].copy()
+                                            _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
+                                            st.session_state[_df_key] = _tmp
+                                    st.rerun()
+                                else:
+                                    st.error(f"오류: {res}")
                         else:
-                            st.error(f"오류: {res}")
+                            if st.button("ON", key=f"on_from_off_{ad_id}",
+                                         use_container_width=True):
+                                res = toggle_ad_status(ad_id, "ACTIVE")
+                                if res is True:
+                                    for _df_key in ("df_ai", "df"):
+                                        if _df_key in st.session_state:
+                                            _tmp = st.session_state[_df_key].copy()
+                                            _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
+                                            st.session_state[_df_key] = _tmp
+                                    st.rerun()
+                                else:
+                                    st.error(f"오류: {res}")
                     st.markdown("</div>", unsafe_allow_html=True)
 
         # 켜기 제안 섹션
@@ -1212,7 +1237,7 @@ if st.session_state.df is not None:
                 with col_btn:
                     st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
                     ad_id = str(row.get("ad_id", ""))
-                    if ad_id and st.button("▶ 켜기", key=f"on_{ad_id}",
+                    if ad_id and st.button("ON", key=f"on_{ad_id}",
                                            use_container_width=True):
                         res = toggle_ad_status(ad_id, "ACTIVE")
                         if res is True:
