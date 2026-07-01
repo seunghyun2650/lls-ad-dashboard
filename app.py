@@ -1119,16 +1119,11 @@ if st.session_state.df is not None:
                 )
             )
         ]
-        # 켜기 제안: 정지 상태 + ROAS >= 1.5 + 구매당비용 <= 상한 + 구매 1건 이상
-        paused_mask = ~df_a["상태"].isin(["ACTIVE"])
-        turn_on = df_a[
-            paused_mask &
-            (df_a["ROAS"] >= 1.5) &
-            (df_a["구매전환"] >= 1) &
-            (df_a["구매당비용"] <= CPO_LIMIT)
-        ]
+
 
         # 요약 카드
+        paused_cnt_ai = len(df_a[~df_a["상태"].isin(["ACTIVE"])])
+        others = len(df_a) - len(turn_off) - paused_cnt_ai
         col_a, col_b, col_c = st.columns(3)
         with col_a:
             st.markdown(f"""
@@ -1139,18 +1134,17 @@ if st.session_state.df is not None:
 </div>""", unsafe_allow_html=True)
         with col_b:
             st.markdown(f"""
-<div style="background:#f0fdf4;border-radius:12px;padding:1rem;
-            text-align:center;border:1px solid #bbf7d0;margin-bottom:1.2rem;">
-  <div style="font-size:1.8rem;font-weight:700;color:#16a34a;">{len(turn_on)}</div>
-  <div style="font-size:0.72rem;color:#16a34a;margin-top:0.2rem;">🟢 켜기 제안</div>
-</div>""", unsafe_allow_html=True)
-        with col_c:
-            others = len(df_a) - len(turn_off) - len(turn_on)
-            st.markdown(f"""
 <div style="background:#f8fafc;border-radius:12px;padding:1rem;
             text-align:center;border:1px solid #e2e8f0;margin-bottom:1.2rem;">
-  <div style="font-size:1.8rem;font-weight:700;color:#64748b;">{others}</div>
-  <div style="font-size:0.72rem;color:#94a3b8;margin-top:0.2rem;">⚪ 현상 유지</div>
+  <div style="font-size:1.8rem;font-weight:700;color:#64748b;">{paused_cnt_ai}</div>
+  <div style="font-size:0.72rem;color:#94a3b8;margin-top:0.2rem;">⏸ 정지된 소재</div>
+</div>""", unsafe_allow_html=True)
+        with col_c:
+            st.markdown(f"""
+<div style="background:#f0fdf4;border-radius:12px;padding:1rem;
+            text-align:center;border:1px solid #bbf7d0;margin-bottom:1.2rem;">
+  <div style="font-size:1.8rem;font-weight:700;color:#16a34a;">{others}</div>
+  <div style="font-size:0.72rem;color:#16a34a;margin-top:0.2rem;">⚪ 현상 유지</div>
 </div>""", unsafe_allow_html=True)
 
         def ad_row_html(row, border_color):
