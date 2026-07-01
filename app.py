@@ -2,6 +2,7 @@ import streamlit as st
 from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.ad import Ad
+from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.adcreative import AdCreative
 from facebook_business.adobjects.adsinsights import AdsInsights
 import pandas as pd
@@ -72,6 +73,11 @@ ACCESS_TOKEN = st.secrets["ACCESS_TOKEN"]
 AD_ACCOUNT_ID = st.secrets["AD_ACCOUNT_ID"]
 APP_ID = st.secrets["APP_ID"]
 APP_SECRET = st.secrets["APP_SECRET"]
+
+# ── 인플루언서 광고 자동 생성용 고정값 ────────────────────────
+FIXED_CAMPAIGN_ID = "1359569702731920"      # 모든 인플루언서 광고세트가 들어갈 고정 캠페인 (LLS_new, ASC)
+FIXED_PIXEL_ID    = "1006658555057381"      # LLS_new 데이터 세트 픽셀
+FIXED_CONVERSION_EVENT = "PURCHASE"          # 전환 최적화 기준 이벤트
 
 # ── CSS ───────────────────────────────────────────────────────
 st.markdown("""
@@ -467,6 +473,50 @@ def toggle_ad_status(ad_id, new_status):
         return True
     except Exception as e:
         return str(e)
+
+
+# ── 인플루언서 광고세트 자동 생성 ───────────────────────────────
+def create_influencer_adset(ad_code, daily_budget, start_date, end_date):
+    """
+    인플루언서별 광고세트를 고정 캠페인(FIXED_CAMPAIGN_ID) 안에 자동으로 생성하는 함수.
+    - ad_code: 인플루언서 식별 코드 (광고세트 이름에 사용됨, 예: 'tegi_0701')
+    - daily_budget: 일일 예산 (원 단위 정수, 예: 30000)
+    - start_date, end_date: 시작일/종료일 (date 객체)
+
+    타겟팅(지역·연령 등)은 별도로 지정하지 않음 — 이 캠페인은 ASC(Advantage+ Shopping)
+    구조라 Meta가 자동으로 타겟을 최적화하며, 타겟 운영은 미디어팀 소관이라 이 함수에서
+    다루지 않음.
+
+    생성 직후에는 안전을 위해 항상 'PAUSED'(정지) 상태로 만들어짐. 확인 후 대시보드
+    AI 분석 탭 또는 Ads Manager에서 직접 켜는 것을 권장.
+
+    반환값: (성공여부: bool, 결과: 새 광고세트 ID 또는 에러 메시지)
+    """
+    try:
+        FacebookAdsApi.init(APP_ID, APP_SECRET, ACCESS_TOKEN)
+        account = AdAccount(AD_ACCOUNT_ID)
+
+        params = {
+            "name": f"[인플루언서] {ad_code}",
+            "campaign_id": FIXED_CAMPAIGN_ID,
+            "daily_budget": int(daily_budget) * 100,  # Meta API는 원이 아닌 최소 화폐 단위(전) 기준
+            "billing_event": "IMPRESSIONS",
+            "optimization_goal": "OFFSITE_CONVERSIONS",
+            "bid_strategy": "LOWEST_COST_WITHOUT_CAP",
+            "status": "PAUSED",
+            "start_time": start_date.strftime("%Y-%m-%dT00:00:00+0900"),
+            "promoted_object": {
+                "pixel_id": FIXED_PIXEL_ID,
+                "custom_event_type": FIXED_CONVERSION_EVENT,
+            },
+        }
+        if end_date:
+            params["end_time"] = end_date.strftime("%Y-%m-%dT23:59:59+0900")
+
+        new_adset = account.create_ad_set(params=params)
+        return True, new_adset["id"]
+    except Exception as e:
+        return False, str(e)
 
 
 # ── 헤더 ─────────────────────────────────────────────────────
@@ -1110,11 +1160,13 @@ if st.session_state.df is not None:
             return f"""
 <div style="background:#fff;border-radius:12px;padding:0.85rem 1rem;
             border:1px solid {border_color};margin-bottom:0.5rem;">
-  <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;">
-    <span style="font-size:0.85rem;font-weight:700;color:#18181b;
-                 flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;
-                 white-space:nowrap;">{row['광고명']}</span>
-    <span style="font-size:0.65rem;color:#a1a1aa;flex-shrink:0;">{row['광고세트']}</span>
+  <div style="margin-bottom:0.4rem;">
+    <span style="font-size:0.85rem;font-weight:700;color:#18181b;">{row['광고명']}</span>
+    <div style="margin-top:0.2rem;">
+      <span style="display:inline-block;font-size:0.68rem;font-weight:600;
+                   color:#0284c7;background:#e0f2fe;border-radius:4px;
+                   padding:1px 7px;">📁 {row['광고세트']}</span>
+    </div>
   </div>
   <div style="display:flex;gap:1.2rem;flex-wrap:wrap;">
     <span style="font-size:0.75rem;">ROAS <strong style="color:{perf_clr};">{roas_pct}</strong></span>
@@ -1211,6 +1263,7 @@ if st.session_state.df is not None:
         "summary": "📊  Summary",
         "list":    "📋  소재 목록",
         "ai":      "🤖  AI 분석",
+        "create":  "🆕  인플루언서 광고 생성",
     }
     nav_cols = st.columns(len(nav_items))
     for col, (key, label) in zip(nav_cols, nav_items.items()):
@@ -1315,6 +1368,38 @@ if st.session_state.df is not None:
                     st.session_state.df_ai = df.copy()
 
         render_ai_analysis(st.session_state.df_ai, ai_start_str, ai_end_str)
+
+    elif st.session_state.active_tab == "create":
+        st.markdown('<p class="section-title">🆕 인플루언서 광고세트 생성</p>', unsafe_allow_html=True)
+        st.markdown(
+            '<p class="section-sub">고정 캠페인(LLS_new) 안에 새 광고세트를 자동으로 만듭니다. '
+            '광고 소재(인플루언서 게시물) 연결은 추가 권한 승인 후 다음 단계에서 붙일 예정입니다.</p>',
+            unsafe_allow_html=True
+        )
+
+        with st.form("create_adset_form"):
+            ad_code = st.text_input("광고코드 (인플루언서 식별값)", placeholder="예: tegi_0701")
+            daily_budget = st.number_input("일일 예산 (원)", min_value=10000, step=10000, value=30000)
+            col_s, col_e = st.columns(2)
+            with col_s:
+                adset_start = st.date_input("시작일", date.today(), key="adset_start_date")
+            with col_e:
+                adset_end = st.date_input("종료일", date.today() + timedelta(days=14), key="adset_end_date")
+            submitted = st.form_submit_button("광고세트 생성", type="primary")
+
+        if submitted:
+            if not ad_code:
+                st.error("광고코드를 입력해주세요.")
+            else:
+                with st.spinner("Meta API로 광고세트 생성 중..."):
+                    success, result = create_influencer_adset(ad_code, daily_budget, adset_start, adset_end)
+                if success:
+                    st.success(
+                        f"✅ 광고세트 생성 완료! (ID: {result}) — "
+                        f"현재 '정지' 상태로 생성되었으니 Ads Manager에서 확인 후 직접 켜주세요."
+                    )
+                else:
+                    st.error(f"❌ 생성 실패: {result}")
 
     # ── CSV ───────────────────────────────────────────────────
     st.markdown("<div style='margin-top:1.5rem;'></div>", unsafe_allow_html=True)
