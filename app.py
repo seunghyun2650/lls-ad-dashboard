@@ -1226,33 +1226,56 @@ if st.session_state.df is not None:
                                     st.error(f"오류: {res}")
                     st.markdown("</div>", unsafe_allow_html=True)
 
-        # 켜기 제안 섹션
-        if len(turn_on) > 0:
-            st.markdown(f'<p class="section-title" style="margin-top:1.2rem;">🟢 켜기 제안 — {len(turn_on)}개 소재</p>', unsafe_allow_html=True)
-            st.markdown('<p class="section-sub">정지 상태지만 ROAS 150% 이상 + 구매당비용 79,000원 이하로 성과가 검증된 소재입니다.</p>', unsafe_allow_html=True)
-            for _, row in turn_on.iterrows():
+        # 정지된 소재 전체 목록 (AI 조건 없이 PAUSED 상태 전부 표시)
+        paused_all = df_a[~df_a["상태"].isin(["ACTIVE"])].copy()
+        if len(paused_all) > 0:
+            st.markdown(f'<p class="section-title" style="margin-top:1.2rem;">⏸ 정지된 소재 — {len(paused_all)}개</p>', unsafe_allow_html=True)
+            st.markdown('<p class="section-sub">현재 정지 상태인 소재 전체 목록입니다. ON 버튼으로 바로 켤 수 있어요.</p>', unsafe_allow_html=True)
+            for _, row in paused_all.iterrows():
+                ad_id = str(row.get("ad_id", ""))
+                current_status = row.get("상태", "PAUSED")
+                for _df_key in ("df_ai", "df"):
+                    if _df_key in st.session_state:
+                        _match = st.session_state[_df_key][st.session_state[_df_key]["ad_id"] == ad_id]
+                        if not _match.empty:
+                            current_status = _match.iloc[0]["상태"]
+                            break
+
                 col_card, col_btn = st.columns([6, 1])
                 with col_card:
-                    st.markdown(ad_row_html(row, "#bbf7d0"), unsafe_allow_html=True)
+                    border = "#bbf7d0" if current_status == "ACTIVE" else "#e4e4e7"
+                    st.markdown(ad_row_html(row, border), unsafe_allow_html=True)
                 with col_btn:
                     st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
-                    ad_id = str(row.get("ad_id", ""))
-                    if ad_id and st.button("ON", key=f"on_{ad_id}",
-                                           use_container_width=True):
-                        res = toggle_ad_status(ad_id, "ACTIVE")
-                        if res is True:
-                            for _df_key in ("df_ai", "df"):
-                                if _df_key in st.session_state:
-                                    _tmp = st.session_state[_df_key].copy()
-                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
-                                    st.session_state[_df_key] = _tmp
-                            st.rerun()
+                    if ad_id:
+                        if current_status != "ACTIVE":
+                            if st.button("ON", key=f"on_{ad_id}", use_container_width=True):
+                                res = toggle_ad_status(ad_id, "ACTIVE")
+                                if res is True:
+                                    for _df_key in ("df_ai", "df"):
+                                        if _df_key in st.session_state:
+                                            _tmp = st.session_state[_df_key].copy()
+                                            _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
+                                            st.session_state[_df_key] = _tmp
+                                    st.rerun()
+                                else:
+                                    st.error(f"오류: {res}")
                         else:
-                            st.error(f"오류: {res}")
+                            if st.button("OFF", key=f"off_from_paused_{ad_id}", type="primary", use_container_width=True):
+                                res = toggle_ad_status(ad_id, "PAUSED")
+                                if res is True:
+                                    for _df_key in ("df_ai", "df"):
+                                        if _df_key in st.session_state:
+                                            _tmp = st.session_state[_df_key].copy()
+                                            _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
+                                            st.session_state[_df_key] = _tmp
+                                    st.rerun()
+                                else:
+                                    st.error(f"오류: {res}")
                     st.markdown("</div>", unsafe_allow_html=True)
 
-        if len(turn_off) == 0 and len(turn_on) == 0:
-            st.success("✅ 현재 모든 소재가 최적 상태입니다! 특별한 조치가 필요하지 않아요.")
+        if len(turn_off) == 0 and len(paused_all) == 0:
+            st.success("✅ 현재 모든 소재가 운영 중이고 효율도 양호합니다!")
 
         # 전체 순위 테이블
         st.markdown('<p class="section-title" style="margin-top:1.8rem;">📋 전체 소재 효율 순위</p>', unsafe_allow_html=True)
