@@ -458,13 +458,12 @@ div[data-testid="column"]:last-child .stButton > button {
 
 # ── 광고 ON/OFF API ───────────────────────────────────────────
 def toggle_ad_status(ad_id, new_status):
+    """Meta API로 광고 상태 변경 (ACTIVE / PAUSED)"""
     try:
-        import requests
-        url = f"https://graph.facebook.com/v19.0/{ad_id}"
-        resp = requests.post(url, data={"status": new_status, "access_token": ACCESS_TOKEN})
-        result = resp.json()
-        if "error" in result:
-            return result["error"].get("message", str(result["error"]))
+        FacebookAdsApi.init(APP_ID, APP_SECRET, ACCESS_TOKEN)
+        ad = Ad(ad_id)
+        ad[Ad.Field.status] = new_status
+        ad.remote_update()  # 실제로 Meta에 상태 변경 요청을 보내는 코드
         return True
     except Exception as e:
         return str(e)
@@ -1130,14 +1129,50 @@ if st.session_state.df is not None:
             st.markdown(f'<p class="section-title">🔴 끄기 제안 — {len(turn_off)}개 소재</p>', unsafe_allow_html=True)
             st.markdown('<p class="section-sub">운영 중이지만 ROAS가 낮거나 구매당비용이 79,000원을 초과하는 소재입니다.</p>', unsafe_allow_html=True)
             for _, row in turn_off.iterrows():
-                st.markdown(ad_row_html(row, "#fecaca"), unsafe_allow_html=True)
+                col_card, col_btn = st.columns([6, 1])
+                with col_card:
+                    st.markdown(ad_row_html(row, "#fecaca"), unsafe_allow_html=True)
+                with col_btn:
+                    st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
+                    ad_id = str(row.get("ad_id", ""))
+                    if ad_id and st.button("⏸ 끄기", key=f"off_{ad_id}",
+                                           type="primary", use_container_width=True):
+                        res = toggle_ad_status(ad_id, "PAUSED")
+                        if res is True:
+                            for _df_key in ("df_ai", "df"):
+                                if _df_key in st.session_state:
+                                    _tmp = st.session_state[_df_key].copy()
+                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
+                                    st.session_state[_df_key] = _tmp
+                            st.rerun()
+                        else:
+                            st.error(f"오류: {res}")
+                    st.markdown("</div>", unsafe_allow_html=True)
 
         # 켜기 제안 섹션
         if len(turn_on) > 0:
             st.markdown(f'<p class="section-title" style="margin-top:1.2rem;">🟢 켜기 제안 — {len(turn_on)}개 소재</p>', unsafe_allow_html=True)
             st.markdown('<p class="section-sub">정지 상태지만 ROAS 150% 이상 + 구매당비용 79,000원 이하로 성과가 검증된 소재입니다.</p>', unsafe_allow_html=True)
             for _, row in turn_on.iterrows():
-                st.markdown(ad_row_html(row, "#bbf7d0"), unsafe_allow_html=True)
+                col_card, col_btn = st.columns([6, 1])
+                with col_card:
+                    st.markdown(ad_row_html(row, "#bbf7d0"), unsafe_allow_html=True)
+                with col_btn:
+                    st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
+                    ad_id = str(row.get("ad_id", ""))
+                    if ad_id and st.button("▶ 켜기", key=f"on_{ad_id}",
+                                           use_container_width=True):
+                        res = toggle_ad_status(ad_id, "ACTIVE")
+                        if res is True:
+                            for _df_key in ("df_ai", "df"):
+                                if _df_key in st.session_state:
+                                    _tmp = st.session_state[_df_key].copy()
+                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
+                                    st.session_state[_df_key] = _tmp
+                            st.rerun()
+                        else:
+                            st.error(f"오류: {res}")
+                    st.markdown("</div>", unsafe_allow_html=True)
 
         if len(turn_off) == 0 and len(turn_on) == 0:
             st.success("✅ 현재 모든 소재가 최적 상태입니다! 특별한 조치가 필요하지 않아요.")
