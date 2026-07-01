@@ -1151,22 +1151,55 @@ if st.session_state.df is not None:
             roas_pct  = f"{row['ROAS']*100:.0f}%"
             spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
             perf_lbl, perf_clr, _ = perf_info(row)
+
+            # 썸네일 + 링크 생성
+            yt_id = get_youtube_id(row["광고명"])
+            ig_url = row.get("instagram_url", "")
+            thumb_url = row.get("썸네일", "")
+
+            if yt_id:
+                thumb_src = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
+                link_url  = f"https://www.youtube.com/shorts/{yt_id}"
+            elif thumb_url:
+                thumb_src = thumb_url
+                link_url  = ig_url if ig_url else "#"
+            else:
+                thumb_src = ""
+                link_url  = ig_url if ig_url else "#"
+
+            if thumb_src:
+                thumb_html = f'''<a href="{link_url}" target="_blank" style="flex-shrink:0;">
+  <img src="{thumb_src}"
+       style="width:52px;height:52px;object-fit:cover;border-radius:8px;
+              border:1px solid #e4e4e7;display:block;" />
+</a>'''
+            else:
+                thumb_html = f'''<a href="{link_url}" target="_blank"
+   style="flex-shrink:0;width:52px;height:52px;border-radius:8px;
+          background:#f4f4f5;border:1px solid #e4e4e7;display:flex;
+          align-items:center;justify-content:center;font-size:1.1rem;
+          text-decoration:none;">🎬</a>'''
+
             return f"""
 <div style="background:#fff;border-radius:12px;padding:0.85rem 1rem;
-            border:1px solid {border_color};margin-bottom:0.5rem;">
-  <div style="margin-bottom:0.4rem;">
-    <span style="font-size:0.85rem;font-weight:700;color:#18181b;">{row['광고명']}</span>
-    <div style="margin-top:0.2rem;">
-      <span style="display:inline-block;font-size:0.68rem;font-weight:600;
-                   color:#0284c7;background:#e0f2fe;border-radius:4px;
-                   padding:1px 7px;">📁 {row['광고세트']}</span>
+            border:1px solid {border_color};margin-bottom:0.5rem;
+            display:flex;align-items:center;gap:0.85rem;">
+  {thumb_html}
+  <div style="flex:1;min-width:0;">
+    <div style="margin-bottom:0.4rem;">
+      <span style="font-size:0.85rem;font-weight:700;color:#18181b;">{row['광고명']}</span>
+      <div style="margin-top:0.2rem;">
+        <span style="display:inline-block;font-size:0.68rem;font-weight:600;
+                     color:#0284c7;background:#e0f2fe;border-radius:4px;
+                     padding:1px 7px;">📁 {row['광고세트']}</span>
+      </div>
     </div>
-  </div>
-  <div style="display:flex;gap:1.2rem;flex-wrap:wrap;">
-    <span style="font-size:0.75rem;">ROAS <strong style="color:{perf_clr};">{roas_pct}</strong></span>
-    <span style="font-size:0.75rem;">광고비 <strong>{row['비용']:,.0f}원</strong></span>
-    <span style="font-size:0.75rem;">구매당비용 <strong>{spend_per}</strong></span>
-    <span style="font-size:0.75rem;">구매수 <strong>{int(row['구매전환'])}건</strong></span>
+    <div style="display:flex;gap:1.2rem;flex-wrap:wrap;">
+      <span style="font-size:0.75rem;">ROAS <strong style="color:{perf_clr};">{roas_pct}</strong></span>
+      <span style="font-size:0.75rem;">광고비 <strong>{row['비용']:,.0f}원</strong></span>
+      <span style="font-size:0.75rem;">구매당비용 <strong>{spend_per}</strong></span>
+      <span style="font-size:0.75rem;">구매수 <strong>{int(row['구매전환'])}건</strong></span>
+    </div>
   </div>
 </div>"""
 
