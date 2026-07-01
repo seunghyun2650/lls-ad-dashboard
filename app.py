@@ -92,6 +92,7 @@ section[data-testid="stMain"] > div,
 /* 상단 헤더 바 숨김 */
 header[data-testid="stHeader"] { background: transparent !important; }
 
+/* ── 대시보드 헤더 ── */
 .dash-header {
     display: flex;
     align-items: center;
@@ -100,9 +101,19 @@ header[data-testid="stHeader"] { background: transparent !important; }
     border-bottom: 1px solid #e4e4e7;
     margin-bottom: 1.5rem;
 }
-.dash-title { font-size: 1.4rem; font-weight: 700; color: #18181b; margin: 0; }
-.dash-sub { font-size: 0.8rem; color: #a1a1aa; margin: 0.1rem 0 0 0; }
+.dash-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #18181b;
+    margin: 0;
+}
+.dash-sub {
+    font-size: 0.8rem;
+    color: #a1a1aa;
+    margin: 0.1rem 0 0 0;
+}
 
+/* ── 요약 메트릭 바 ── */
 .metrics-bar {
     display: flex;
     background: #ffffff;
@@ -111,15 +122,43 @@ header[data-testid="stHeader"] { background: transparent !important; }
     box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     margin-bottom: 1.8rem;
 }
-.metric-item { flex: 1; text-align: center; padding: 0 1rem; }
-.metric-item + .metric-item { border-left: 1px solid #f0f0f0; }
-.mi-label { font-size: 0.72rem; color: #a1a1aa; font-weight: 500; margin-bottom: 0.3rem; letter-spacing: 0.02em; }
-.mi-value { font-size: 1.45rem; font-weight: 700; color: #18181b; line-height: 1.2; }
+.metric-item {
+    flex: 1;
+    text-align: center;
+    padding: 0 1rem;
+}
+.metric-item + .metric-item {
+    border-left: 1px solid #f0f0f0;
+}
+.mi-label {
+    font-size: 0.72rem;
+    color: #a1a1aa;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.02em;
+}
+.mi-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #18181b;
+    line-height: 1.2;
+}
 .mi-roas { color: #16a34a !important; }
 
-.section-title { font-size: 0.95rem; font-weight: 700; color: #18181b; margin: 0.2rem 0 0.8rem 0; }
-.section-sub { font-size: 0.78rem; color: #a1a1aa; margin: -0.4rem 0 0.8rem 0; }
+/* ── 섹션 타이틀 ── */
+.section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #18181b;
+    margin: 0.2rem 0 0.8rem 0;
+}
+.section-sub {
+    font-size: 0.78rem;
+    color: #a1a1aa;
+    margin: -0.4rem 0 0.8rem 0;
+}
 
+/* ── 정렬 버튼 ── */
 .stButton > button {
     background: #ffffff !important;
     border: 1.5px solid #e4e4e7 !important;
@@ -132,108 +171,299 @@ header[data-testid="stHeader"] { background: transparent !important; }
     transition: all 0.15s ease !important;
     font-family: 'Noto Sans KR', sans-serif !important;
 }
-.stButton > button:hover { background: #18181b !important; color: #ffffff !important; border-color: #18181b !important; }
-.stButton > button:focus { box-shadow: none !important; outline: none !important; }
+.stButton > button:hover {
+    background: #18181b !important;
+    color: #ffffff !important;
+    border-color: #18181b !important;
+}
+.stButton > button:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
 
-.ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+/* ── 광고 그리드 ── */
+.ad-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+}
 
+/* ── 광고 카드 ── */
 .ad-card-g {
-    background: #ffffff; border-radius: 16px; overflow: hidden;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    transition: box-shadow 0.2s ease, transform 0.2s ease; border: 1px solid #f0f0f0;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    border: 1px solid #f0f0f0;
 }
-.ad-card-g:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
+.ad-card-g:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
 
-.thumb-area { position: relative; width: 100%; height: 190px; overflow: hidden; background: #f4f4f5; }
-.thumb-area img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.thumb-no-img { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #a1a1aa; font-size: 0.82rem; }
+/* ── 썸네일 영역 ── */
+.thumb-area {
+    position: relative;
+    width: 100%;
+    height: 190px;
+    overflow: hidden;
+    background: #f4f4f5;
+}
+.thumb-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.thumb-no-img {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a1a1aa;
+    font-size: 0.82rem;
+}
 
+/* 상태 뱃지 */
 .status-pill {
-    position: absolute; top: 9px; left: 9px; font-size: 0.65rem; font-weight: 600;
-    padding: 3px 8px; border-radius: 100px; backdrop-filter: blur(4px); z-index: 10;
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 100px;
+    backdrop-filter: blur(4px);
+    z-index: 10;
 }
-.sp-active { background: rgba(220,252,231,0.92); color: #15803d; }
-.sp-paused { background: rgba(244,244,245,0.92); color: #71717a; }
+.sp-active {
+    background: rgba(220,252,231,0.92);
+    color: #15803d;
+}
+.sp-paused {
+    background: rgba(244,244,245,0.92);
+    color: #71717a;
+}
 
+/* YouTube 뱃지 */
 .yt-badge {
-    position: absolute; bottom: 9px; right: 9px; background: rgba(185,0,0,0.88);
-    color: white; font-size: 0.62rem; padding: 2px 7px; border-radius: 4px; font-weight: 700;
+    position: absolute;
+    bottom: 9px;
+    right: 9px;
+    background: rgba(185,0,0,0.88);
+    color: white;
+    font-size: 0.62rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
 }
 
-.card-body { padding: 0.85rem 0.95rem 0.95rem; }
-.card-ad-name { font-size: 0.82rem; font-weight: 700; color: #18181b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.1rem; }
-.card-adset { font-size: 0.68rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.7rem; }
-.card-date { font-size: 0.65rem; color: #c4c4c4; margin-bottom: 0.65rem; }
+/* ── 카드 본문 ── */
+.card-body {
+    padding: 0.85rem 0.95rem 0.95rem;
+}
+.card-ad-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #18181b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.1rem;
+}
+.card-adset {
+    font-size: 0.68rem;
+    color: #a1a1aa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.7rem;
+}
+.card-date {
+    font-size: 0.65rem;
+    color: #c4c4c4;
+    margin-bottom: 0.65rem;
+}
 
-.kpi-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 0.65rem; }
-.kpi-box { background: #fafaf9; border-radius: 9px; padding: 0.45rem 0.3rem; text-align: center; border: 1px solid #f0f0f0; }
-.kpi-box-active { background: #f0f9ff; border: 1.5px solid #bae6fd; }
-.kpi-lbl { font-size: 0.6rem; color: #a1a1aa; margin-bottom: 0.15rem; font-weight: 500; }
-.kpi-lbl-active { font-size: 0.6rem; color: #0284c7; margin-bottom: 0.15rem; font-weight: 700; }
-.kpi-val { font-size: 0.82rem; font-weight: 700; color: #18181b; }
+/* KPI 박스 3개 */
+.kpi-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 0.65rem;
+}
+.kpi-box {
+    background: #fafaf9;
+    border-radius: 9px;
+    padding: 0.45rem 0.3rem;
+    text-align: center;
+    border: 1px solid #f0f0f0;
+}
+.kpi-box-active {
+    background: #f0f9ff;
+    border: 1.5px solid #bae6fd;
+}
+.kpi-lbl {
+    font-size: 0.6rem;
+    color: #a1a1aa;
+    margin-bottom: 0.15rem;
+    font-weight: 500;
+}
+.kpi-lbl-active {
+    font-size: 0.6rem;
+    color: #0284c7;
+    margin-bottom: 0.15rem;
+    font-weight: 700;
+}
+.kpi-val {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #18181b;
+}
 .kv-green { color: #16a34a !important; }
 .kv-amber { color: #d97706 !important; }
 .kv-red   { color: #dc2626 !important; }
 
-.card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-.tag { font-size: 0.65rem; color: #71717a; background: #f4f4f5; border-radius: 5px; padding: 2px 7px; font-weight: 500; }
-
-div[data-testid="column"]:last-child .stButton > button {
-    font-size: 0.72rem !important; padding: 0.2rem 0.7rem !important;
-    color: #a1a1aa !important; border-color: #e4e4e7 !important;
+/* 하단 태그열 */
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.tag {
+    font-size: 0.65rem;
+    color: #71717a;
+    background: #f4f4f5;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-weight: 500;
 }
 
+/* ── 로그아웃 버튼 크기 ── */
+div[data-testid="column"]:last-child .stButton > button {
+    font-size: 0.72rem !important;
+    padding: 0.2rem 0.7rem !important;
+    color: #a1a1aa !important;
+    border-color: #e4e4e7 !important;
+}
+
+/* date_input, caption 색 */
 .stDateInput label { font-size: 0.78rem !important; color: #71717a !important; }
 .stCaption { color: #a1a1aa !important; font-size: 0.75rem !important; }
+
+/* expander */
 .streamlit-expanderHeader { font-size: 0.8rem !important; }
 
+/* ── 리스트 뷰 ── */
 .ad-list { display: flex; flex-direction: column; gap: 10px; }
 
 .list-row {
-    background: #fff; border-radius: 14px; display: flex; align-items: stretch;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #f0f0f0;
-    overflow: hidden; transition: box-shadow 0.2s ease;
+    background: #fff;
+    border-radius: 14px;
+    display: flex;
+    align-items: stretch;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
 }
 .list-row:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 
-.list-thumb { position: relative; width: 140px; flex-shrink: 0; background: #f4f4f5; overflow: hidden; }
-.list-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.list-thumb {
+    position: relative;
+    width: 140px;
+    flex-shrink: 0;
+    background: #f4f4f5;
+    overflow: hidden;
+}
+.list-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+}
 
 .list-body {
-    flex: 1; padding: 0.85rem 1.1rem; display: flex; flex-direction: column;
-    justify-content: space-between; min-width: 0; gap: 0.6rem;
+    flex: 1;
+    padding: 0.85rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    gap: 0.6rem;
 }
-.list-name { font-size: 0.9rem; font-weight: 700; color: #18181b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.1rem; }
-.list-meta { font-size: 0.7rem; color: #a1a1aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.list-metrics { display: flex; flex-wrap: wrap; gap: 6px; }
-.lm-item { background: #fafaf9; border-radius: 8px; padding: 0.35rem 0.65rem; text-align: center; border: 1px solid #f0f0f0; min-width: 72px; }
-.lm-primary { background: #f0f9ff; border-color: #bae6fd; }
-.lm-lbl { font-size: 0.58rem; color: #a1a1aa; font-weight: 500; margin-bottom: 0.1rem; }
-.lm-lbl-primary { font-size: 0.58rem; color: #0284c7; font-weight: 700; margin-bottom: 0.1rem; }
-.lm-val { font-size: 0.82rem; font-weight: 700; color: #18181b; }
+.list-name {
+    font-size: 0.9rem; font-weight: 700; color: #18181b;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 0.1rem;
+}
+.list-meta {
+    font-size: 0.7rem; color: #a1a1aa;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.list-metrics {
+    display: flex; flex-wrap: wrap; gap: 6px;
+}
+.lm-item {
+    background: #fafaf9; border-radius: 8px;
+    padding: 0.35rem 0.65rem; text-align: center;
+    border: 1px solid #f0f0f0; min-width: 72px;
+}
+.lm-primary {
+    background: #f0f9ff; border-color: #bae6fd;
+}
+.lm-lbl {
+    font-size: 0.58rem; color: #a1a1aa;
+    font-weight: 500; margin-bottom: 0.1rem;
+}
+.lm-lbl-primary {
+    font-size: 0.58rem; color: #0284c7;
+    font-weight: 700; margin-bottom: 0.1rem;
+}
+.lm-val {
+    font-size: 0.82rem; font-weight: 700; color: #18181b;
+}
 
-.sum-stat { flex: 1; background: white; border-radius: 12px; padding: 1rem 1.2rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
+/* ── Summary 뷰 ── */
+.sum-stat {
+    flex: 1; background: white; border-radius: 12px;
+    padding: 1rem 1.2rem; text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid #f0f0f0;
+}
 .sum-stat-val { font-size: 1.8rem; font-weight: 700; color: #18181b; }
 .sum-stat-lbl { font-size: 0.72rem; color: #a1a1aa; margin-top: 0.2rem; }
 
-.sum-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.8rem; border-radius: 10px; margin-bottom: 6px; background: white; border: 1px solid #f0f0f0; }
+.sum-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.65rem 0.8rem; border-radius: 10px;
+    margin-bottom: 6px; background: white;
+    border: 1px solid #f0f0f0;
+}
 .sum-rank { font-size: 0.7rem; font-weight: 700; color: #a1a1aa; min-width: 22px; }
-.sum-thumb { position: relative; width: 56px; height: 56px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #f4f4f5; }
+.sum-thumb {
+    position: relative; width: 56px; height: 56px;
+    border-radius: 8px; overflow: hidden; flex-shrink: 0;
+    background: #f4f4f5;
+}
 .sum-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
-.sum-name { font-size: 0.8rem; font-weight: 600; color: #18181b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.1rem; }
+.sum-name {
+    font-size: 0.8rem; font-weight: 600; color: #18181b;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 0.1rem;
+}
 .sum-roas { font-size: 0.9rem; font-weight: 700; }
 </style>
 """, unsafe_allow_html=True)
 
 # ── 광고 ON/OFF API ───────────────────────────────────────────
 def toggle_ad_status(ad_id, new_status):
+    """Meta API로 광고 상태 변경 (ACTIVE / PAUSED)"""
     try:
-        import requests
-        url = f"https://graph.facebook.com/v19.0/{ad_id}"
-        resp = requests.post(url, data={"status": new_status, "access_token": ACCESS_TOKEN})
-        result = resp.json()
-        if "error" in result:
-            return result["error"].get("message", str(result["error"]))
+        FacebookAdsApi.init(APP_ID, APP_SECRET, ACCESS_TOKEN)
+        ad = Ad(ad_id)
+        ad[Ad.Field.status] = new_status
+        ad.remote_update()  # 실제로 Meta에 상태 변경 요청을 보내는 코드
         return True
     except Exception as e:
         return str(e)
@@ -281,63 +511,64 @@ if "df" not in st.session_state:
 if "sort_by" not in st.session_state:
     st.session_state.sort_by = "구매전환금액"
 
-# ── 캐싱 함수 ─────────────────────────────────────────────────
+# ── 캐싱 함수 (날짜가 같으면 API 재호출 없음) ─────────────────
 @st.cache_data(show_spinner=False)
 def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app_id, app_secret):
-    import requests as _req
-    import json as _json
+    """날짜 범위가 같으면 캐시된 데이터 반환, 다르면 API 새로 호출.
+    반환값은 순수 Python 기본 타입(list of dict)만 사용."""
+    FacebookAdsApi.init(app_id, app_secret, access_token)
+    account = AdAccount(ad_account_id)
 
-    BASE = "https://graph.facebook.com/v19.0"
+    fields = [
+        AdsInsights.Field.ad_id,
+        AdsInsights.Field.ad_name,
+        AdsInsights.Field.adset_id,
+        AdsInsights.Field.adset_name,
+        AdsInsights.Field.campaign_id,
+        AdsInsights.Field.campaign_name,
+        AdsInsights.Field.spend,
+        AdsInsights.Field.impressions,
+        AdsInsights.Field.clicks,
+        AdsInsights.Field.ctr,
+        AdsInsights.Field.cpc,
+        AdsInsights.Field.actions,
+        AdsInsights.Field.action_values,
+    ]
+    params = {
+        "time_range": {"since": start_date_str, "until": end_date_str},
+        "level": "ad",
+        "limit": 500,
+    }
+    insights = account.get_insights(fields=fields, params=params)
 
-    def _paginate(url, params):
-        results = []
-        while url:
-            r = _req.get(url, params=params, timeout=30)
-            d = r.json()
-            if "error" in d:
-                raise Exception(d["error"].get("message", str(d["error"])))
-            results.extend(d.get("data", []))
-            url = d.get("paging", {}).get("next")
-            params = {}
-        return results
-
-    all_insights = _paginate(
-        f"{BASE}/{ad_account_id}/insights",
-        {
-            "fields": "ad_id,ad_name,adset_id,adset_name,campaign_id,campaign_name,spend,impressions,clicks,ctr,cpc,actions,action_values",
-            "time_range": _json.dumps({"since": start_date_str, "until": end_date_str}),
-            "level": "ad",
-            "limit": 500,
-            "access_token": access_token,
-        },
-    )
-
+    # 광고 크리에이티브 일괄 조회 (plain dict만 저장)
     ad_cache = {}
     try:
-        ads = _paginate(
-            f"{BASE}/{ad_account_id}/ads",
-            {
-                "fields": "id,status,effective_status,created_time,creative{thumbnail_url,image_url,video_id,instagram_permalink_url}",
-                "limit": 200,
-                "access_token": access_token,
-            },
-        )
-        for ad in ads:
-            creative = ad.get("creative", {})
-            ad_cache[str(ad["id"])] = {
-                "status":                  str(ad.get("status", "")),
-                "effective_status":        str(ad.get("effective_status", "")),
-                "created_time":            str(ad.get("created_time", "")),
-                "thumbnail_url":           str(creative.get("thumbnail_url", "")),
-                "image_url":               str(creative.get("image_url", "")),
-                "video_id":                str(creative.get("video_id", "")),
+        ads_cursor = account.get_ads(fields=[
+            "id", "status", "effective_status", "created_time",
+            "creative{thumbnail_url,image_url,video_id,instagram_permalink_url}",
+        ], params={"limit": 200})
+        for ad_item in ads_cursor:
+            raw = dict(ad_item)
+            ad_id = str(raw.get("id", ""))
+            # creative 필드를 plain dict로 변환
+            creative_raw = raw.get("creative", {})
+            creative = dict(creative_raw) if creative_raw else {}
+            ad_cache[ad_id] = {
+                "status":                str(raw.get("status", "")),
+                "effective_status":      str(raw.get("effective_status", "")),
+                "created_time":          str(raw.get("created_time", "")),
+                "thumbnail_url":         str(creative.get("thumbnail_url", "")),
+                "image_url":             str(creative.get("image_url", "")),
+                "video_id":              str(creative.get("video_id", "")),
                 "instagram_permalink_url": str(creative.get("instagram_permalink_url", "")),
             }
     except Exception:
         pass
 
     rows = []
-    for data in all_insights:
+    for insight in insights:
+        data = dict(insight)
         spend       = float(data.get("spend", 0))
         ctr         = float(data.get("ctr", 0))
         cpc         = float(data.get("cpc", 0))
@@ -362,7 +593,7 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
         ad_info = ad_cache.get(ad_id, {})
         if ad_info:
             status     = ad_info["effective_status"]
-            start_time = ad_info["created_time"][:10] if ad_info["created_time"] else ""
+            start_time = ad_info["created_time"][:10]
             video_id   = ad_info["video_id"]
             if video_id and video_id != "None":
                 is_video      = True
@@ -371,34 +602,34 @@ def fetch_ad_data(start_date_str, end_date_str, access_token, ad_account_id, app
                 thumbnail_url = ad_info["image_url"] or ad_info["thumbnail_url"]
 
         rows.append({
-            "ad_id":        ad_id,
-            "ad_status":    ad_info.get("status", ""),
-            "썸네일":       thumbnail_url,
-            "instagram_url": ad_info.get("instagram_permalink_url", ""),
-            "영상여부":      is_video,
-            "캠페인":       str(data.get("campaign_name", "")),
-            "광고명":       str(data.get("ad_name", "")),
+            "ad_id":          ad_id,
+            "ad_status":      ad_info.get("status", ""),
+            "썸네일":         thumbnail_url,
+            "instagram_url":  ad_info.get("instagram_permalink_url", ""),
+            "영상여부":        is_video,
+            "캠페인":         str(data.get("campaign_name", "")),
+            "광고명":      str(data.get("ad_name", "")),
             "광고세트":     str(data.get("adset_name", "")),
-            "상태":         status,
-            "시작일":       start_time,
-            "비용":         spend,
+            "상태":        status,
+            "시작일":      start_time,
+            "비용":        spend,
             "구매전환":     purchases,
-            "구매전환금액": purchase_value,
-            "ROAS":         roas,
-            "CTR(%)":       round(ctr, 2),
-            "CPC":          round(cpc, 2),
-            "노출수":       impressions,
-            "클릭수":       clicks,
-            "CVR(%)":       round(purchases / clicks * 100, 2) if clicks > 0 else 0.0,
+            "구매전환금액":  purchase_value,
+            "ROAS":        roas,
+            "CTR(%)":      round(ctr, 2),
+            "CPC":         round(cpc, 2),
+            "노출수":      impressions,
+            "클릭수":      clicks,
+            "CVR(%)":      round(purchases / clicks * 100, 2) if clicks > 0 else 0.0,
             "구매당비용":   round(spend / purchases, 0) if purchases > 0 else 999999999,
         })
 
-    return rows
+    return rows  # 순수 list[dict] → pickle 직렬화 가능
 
 # ── 데이터 fetch ──────────────────────────────────────────────
 if fetch_btn:
     if force_refresh:
-        fetch_ad_data.clear()
+        fetch_ad_data.clear()  # 캐시 초기화 → API 강제 재호출
     with st.spinner("Meta API에서 데이터 가져오는 중..."):
         try:
             rows = fetch_ad_data(
@@ -416,10 +647,6 @@ if fetch_btn:
 if st.session_state.df is not None:
     df = st.session_state.df
 
-    if df.empty or "비용" not in df.columns:
-        st.info("📊 조회 버튼을 눌러 광고 데이터를 불러오세요.")
-        st.stop()
-
     # 요약 메트릭
     total_spend      = df["비용"].sum()
     total_purchases  = df["구매전환"].sum()
@@ -430,11 +657,26 @@ if st.session_state.df is not None:
 
     st.markdown(f"""
     <div class="metrics-bar">
-        <div class="metric-item"><div class="mi-label">총 광고비용</div><div class="mi-value">{total_spend:,.0f}원</div></div>
-        <div class="metric-item"><div class="mi-label">총 구매전환</div><div class="mi-value">{total_purchases:,}건</div></div>
-        <div class="metric-item"><div class="mi-label">전체 ROAS</div><div class="mi-value mi-roas">{overall_roas_pct}</div></div>
-        <div class="metric-item"><div class="mi-label">총 전환금액</div><div class="mi-value">{total_conv_value:,.0f}원</div></div>
-        <div class="metric-item"><div class="mi-label">평균 구매당비용</div><div class="mi-value">{cost_per_purchase:,.0f}원</div></div>
+        <div class="metric-item">
+            <div class="mi-label">총 광고비용</div>
+            <div class="mi-value">{total_spend:,.0f}원</div>
+        </div>
+        <div class="metric-item">
+            <div class="mi-label">총 구매전환</div>
+            <div class="mi-value">{total_purchases:,}건</div>
+        </div>
+        <div class="metric-item">
+            <div class="mi-label">전체 ROAS</div>
+            <div class="mi-value mi-roas">{overall_roas_pct}</div>
+        </div>
+        <div class="metric-item">
+            <div class="mi-label">총 전환금액</div>
+            <div class="mi-value">{total_conv_value:,.0f}원</div>
+        </div>
+        <div class="metric-item">
+            <div class="mi-label">평균 구매당비용</div>
+            <div class="mi-value">{cost_per_purchase:,.0f}원</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -445,6 +687,7 @@ if st.session_state.df is not None:
         return "kv-red"
 
     def thumb_inner_html(row, height=160):
+        """썸네일 inner HTML 반환 (list/summary 공용)"""
         yt_id = get_youtube_id(row["광고명"])
         if yt_id:
             thumb    = f"https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg"
@@ -467,10 +710,12 @@ if st.session_state.df is not None:
         return f'<div class="thumb-no-img">{label}</div>'
 
     def render_list(df_render, sort_key="ROAS"):
+        """리스트형 렌더링 — 썸네일 크게 왼쪽, 지표 오른쪽"""
+        # 정렬 기준별 지표 순서 (첫 번째가 강조)
         metric_order = {
-            "ROAS":      ["ROAS", "전환금액", "광고비", "구매당비용", "CVR", "구매수", "CTR", "노출"],
+            "ROAS":     ["ROAS", "전환금액", "광고비", "구매당비용", "CVR", "구매수", "CTR", "노출"],
             "구매당비용": ["구매당비용", "광고비", "ROAS", "전환금액", "CVR", "구매수", "CTR", "노출"],
-            "CVR":       ["CVR", "ROAS", "광고비", "전환금액", "구매당비용", "구매수", "CTR", "노출"],
+            "CVR":      ["CVR", "ROAS", "광고비", "전환금액", "구매당비용", "구매수", "CTR", "노출"],
             "전환금액":  ["전환금액", "ROAS", "광고비", "구매당비용", "CVR", "구매수", "CTR", "노출"],
         }
         order = metric_order.get(sort_key, metric_order["ROAS"])
@@ -485,13 +730,13 @@ if st.session_state.df is not None:
             date_txt  = row["시작일"] if row["시작일"] else "-"
 
             all_metrics = {
-                "ROAS":      (roas_pct, rc),
+                "ROAS":     (roas_pct, rc),
                 "전환금액":  (f"{row['구매전환금액']:,.0f}원", ""),
                 "광고비":    (f"{row['비용']:,.0f}원", ""),
-                "CVR":       (f"{row['CVR(%)']}%", ""),
+                "CVR":      (f"{row['CVR(%)']}%", ""),
                 "구매당비용": (spend_per, ""),
                 "구매수":    (f"{row['구매전환']}건", ""),
-                "CTR":       (f"{row['CTR(%)']}%", ""),
+                "CTR":      (f"{row['CTR(%)']}%", ""),
                 "노출":      (f"{row['노출수']:,}", ""),
             }
 
@@ -528,10 +773,11 @@ if st.session_state.df is not None:
         st.markdown(f'<div class="ad-list">{rows_html}</div>', unsafe_allow_html=True)
 
     def render_summary(df):
-        active_cnt  = len(df[df["상태"] == "ACTIVE"])
-        paused_cnt  = len(df[df["상태"] == "PAUSED"])
-        profitable  = len(df[df["ROAS"] >= 1])
-        total_cnt   = len(df)
+        """Summary 탭 — 전체 현황 + TOP 5 랭킹"""
+        active_cnt    = len(df[df["상태"] == "ACTIVE"])
+        paused_cnt    = len(df[df["상태"] == "PAUSED"])
+        profitable    = len(df[df["ROAS"] >= 1])
+        total_cnt     = len(df)
 
         st.markdown(f"""
 <div style="display:flex;gap:12px;margin-bottom:1.8rem;">
@@ -574,6 +820,7 @@ if st.session_state.df is not None:
 
         with col_r:
             st.markdown('<p class="section-title">💸 구매당비용 낮은순 TOP 5</p>', unsafe_allow_html=True)
+            # 구매가 있는 소재만 (999999999 제외)
             top5c = (df[df["구매당비용"] < 999999999]
                      .sort_values("구매당비용", ascending=True)
                      .head(5).reset_index(drop=True))
@@ -603,19 +850,58 @@ if st.session_state.df is not None:
             st.markdown(f'<div>{rows}</div>', unsafe_allow_html=True)
 
     def sort_df(df, col, ascending):
+        """운영중 소재 먼저, 그 안에서 지표 기준 정렬"""
         tmp = df.copy()
-        tmp["_s"] = (tmp["상태"] != "ACTIVE").astype(int)
+        tmp["_s"] = (tmp["상태"] != "ACTIVE").astype(int)  # 0=운영중, 1=정지
         return (tmp.sort_values(["_s", col], ascending=[True, ascending])
                    .drop(columns=["_s"])
                    .reset_index(drop=True))
 
-    MAX_COLS = 5
+    # ── 광고세트별 보기 ────────────────────────────────────────
+    def render_adset_view(df_all, col_key="ROAS", asc=False, sort_label="ROAS"):
+        adset_groups = df_all.groupby("광고세트")
+        for adset_name, df_adset in adset_groups:
+            adset_spend     = df_adset["비용"].sum()
+            adset_cv        = df_adset["구매전환금액"].sum()
+            adset_roas      = round(adset_cv / adset_spend, 2) if adset_spend > 0 else 0
+            adset_roas_pct  = f"{adset_roas * 100:.0f}%"
+            adset_purchases = int(df_adset["구매전환"].sum())
+            active_cnt      = int((df_adset["상태"] == "ACTIVE").sum())
+            rc = "color:#16a34a;" if adset_roas >= 1 else "color:#dc2626;"
+
+            st.markdown(f"""
+<div style="background:#fff;border-radius:14px;padding:1rem 1.3rem;
+            margin-bottom:0.7rem;border:1px solid #e4e4e7;
+            box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.7rem;">
+    <span style="font-size:0.95rem;font-weight:700;color:#18181b;">📁 {adset_name}</span>
+    <span style="font-size:0.72rem;color:#a1a1aa;">{len(df_adset)}개 소재 · 운영중 {active_cnt}개</span>
+  </div>
+  <div style="display:flex;gap:2rem;">
+    <div><div style="font-size:0.62rem;color:#a1a1aa;margin-bottom:0.1rem;">광고비</div>
+         <div style="font-size:0.9rem;font-weight:700;">{adset_spend:,.0f}원</div></div>
+    <div><div style="font-size:0.62rem;color:#a1a1aa;margin-bottom:0.1rem;">ROAS</div>
+         <div style="font-size:0.9rem;font-weight:700;{rc}">{adset_roas_pct}</div></div>
+    <div><div style="font-size:0.62rem;color:#a1a1aa;margin-bottom:0.1rem;">구매수</div>
+         <div style="font-size:0.9rem;font-weight:700;">{adset_purchases}건</div></div>
+    <div><div style="font-size:0.62rem;color:#a1a1aa;margin-bottom:0.1rem;">전환금액</div>
+         <div style="font-size:0.9rem;font-weight:700;">{adset_cv:,.0f}원</div></div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+            render_list(sort_df(df_adset, col_key, asc), sort_label)
+            st.markdown("<div style='margin-bottom:1.8rem;'></div>", unsafe_allow_html=True)
+
+    # ── 광고세트별 가로 보기 (칸반) ────────────────────────────
+    MAX_COLS = 5  # 한 줄에 최대 광고세트 수
     def render_adset_horizontal(df_all, col_key="ROAS", asc=False, sort_label="ROAS"):
         adset_groups = list(df_all.groupby("광고세트"))
+        # 운영중 소재 많은 세트 왼쪽, OFF 세트 오른쪽
         adset_groups.sort(key=lambda x: (x[1]["상태"] == "ACTIVE").sum(), reverse=True)
         n = len(adset_groups)
         if n == 0:
             return
+        # MAX_COLS 단위로 행 분할
         for row_start in range(0, n, MAX_COLS):
             row_groups = adset_groups[row_start:row_start + MAX_COLS]
             st_cols = st.columns(len(row_groups))
@@ -629,15 +915,23 @@ if st.session_state.df is not None:
                     active_cnt      = int((df_adset["상태"] == "ACTIVE").sum())
                     border_clr      = "#16a34a" if adset_roas >= 1 else "#dc2626"
                     roas_clr        = "#16a34a" if adset_roas >= 1 else "#dc2626"
-                    bg_clr          = "rgba(220,252,231,0.6)" if adset_roas >= 1 else "rgba(254,226,226,0.6)"
 
+                    # 세트 헤더 카드
+                    bg_clr   = "rgba(220,252,231,0.6)" if adset_roas >= 1 else "rgba(254,226,226,0.6)"
                     st.markdown(f"""
 <div style="background:{bg_clr};border-radius:14px;padding:1rem 1.1rem;
             margin-bottom:0.9rem;border:2px solid {border_clr};
             box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-  <div style="font-size:0.65rem;font-weight:600;color:{border_clr};letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.25rem;">📁 광고세트</div>
-  <div style="font-size:0.88rem;font-weight:800;color:#18181b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.75rem;" title="{adset_name}">{adset_name}</div>
-  <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.7);border-radius:10px;padding:0.6rem 0.8rem;margin-bottom:0.5rem;">
+  <div style="font-size:0.65rem;font-weight:600;color:{border_clr};
+              letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.25rem;">
+    📁 광고세트
+  </div>
+  <div style="font-size:0.88rem;font-weight:800;color:#18181b;
+              white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+              margin-bottom:0.75rem;" title="{adset_name}">{adset_name}</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;
+              background:rgba(255,255,255,0.7);border-radius:10px;
+              padding:0.6rem 0.8rem;margin-bottom:0.5rem;">
     <div style="text-align:center;">
       <div style="font-size:0.58rem;color:#71717a;margin-bottom:0.1rem;">ROAS</div>
       <div style="font-size:1.3rem;font-weight:800;color:{roas_clr};line-height:1;">{adset_roas_pct}</div>
@@ -660,6 +954,7 @@ if st.session_state.df is not None:
 </div>
 """, unsafe_allow_html=True)
 
+                    # 소재 카드 목록
                     df_sorted  = sort_df(df_adset, col_key, asc)
                     cards_html = ""
                     for _, row in df_sorted.iterrows():
@@ -669,28 +964,30 @@ if st.session_state.df is not None:
                         sp_text   = "운영중" if row["상태"] == "ACTIVE" else "정지"
                         spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
 
+                        # 정렬 기준에 따라 강조 지표 동적 결정
                         primary_map = {
-                            "ROAS":      ("ROAS",    roas_pct,                      rc),
-                            "구매당비용": ("구매당비용", spend_per,                   "#18181b"),
-                            "CVR":       ("CVR",     f"{row['CVR(%)']}%",           "#18181b"),
-                            "전환금액":  ("전환금액", f"{row['구매전환금액']:,.0f}원", "#18181b"),
+                            "ROAS":     ("ROAS",     roas_pct,                        rc),
+                            "구매당비용": ("구매당비용", spend_per,                       "#18181b"),
+                            "CVR":      ("CVR",      f"{row['CVR(%)']}%",             "#18181b"),
+                            "전환금액":  ("전환금액",  f"{row['구매전환금액']:,.0f}원",   "#18181b"),
                         }
                         p_lbl, p_val, p_clr = primary_map.get(sort_label, ("ROAS", roas_pct, rc))
 
+                        # 나머지 3개 보조 지표 (기준 제외)
                         all_sec = [
-                            ("ROAS",     roas_pct,                   rc),
-                            ("구매당비용", spend_per,                 "#18181b"),
-                            ("광고비",   f"{row['비용']:,.0f}원",     "#18181b"),
-                            ("구매수",   f"{int(row['구매전환'])}건",  "#18181b"),
+                            ("ROAS",     roas_pct,                      rc),
+                            ("구매당비용", spend_per,                     "#18181b"),
+                            ("광고비",   f"{row['비용']:,.0f}원",          "#18181b"),
+                            ("구매수",   f"{int(row['구매전환'])}건",       "#18181b"),
                         ]
                         sec = [m for m in all_sec if m[0] != p_lbl][:3]
 
-                        yt_id  = get_youtube_id(row["광고명"])
+                        yt_id = get_youtube_id(row["광고명"])
                         ig_url = row.get("instagram_url", "")
                         if yt_id:
-                            fb     = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
+                            fb      = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
                             yt_link = f"https://www.youtube.com/shorts/{yt_id}"
-                            th = f'<a href="{yt_link}" target="_blank" style="display:block;width:100%;height:100%;"><img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:contain;"></a>'
+                            th  = f'<a href="{yt_link}" target="_blank" style="display:block;width:100%;height:100%;"><img src="https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" onerror="this.src=\'{fb}\'" style="width:100%;height:100%;object-fit:contain;"></a>'
                         elif row["썸네일"]:
                             img = f'<img src="{row["썸네일"]}" style="width:100%;height:100%;object-fit:contain;">'
                             th  = f'<a href="{ig_url}" target="_blank" style="display:block;width:100%;height:100%;">{img}</a>' if ig_url else img
@@ -699,26 +996,36 @@ if st.session_state.df is not None:
                             th  = f'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#a1a1aa;">{lbl}</div>'
 
                         cards_html += f"""
-<div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #f0f0f0;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+<div style="background:#fff;border-radius:12px;overflow:hidden;
+            border:1px solid #f0f0f0;margin-bottom:8px;
+            box-shadow:0 1px 3px rgba(0,0,0,0.05);">
   <div style="position:relative;height:200px;background:#18181b;overflow:hidden;">
     {th}
     <span class="status-pill {sp_cls}">{sp_text}</span>
   </div>
   <div style="padding:0.6rem 0.65rem;">
-    <div style="font-size:0.75rem;font-weight:700;color:#18181b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0.45rem;" title="{row['광고명']}">{row['광고명']}</div>
+    <div style="font-size:0.75rem;font-weight:700;color:#18181b;
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+                margin-bottom:0.45rem;" title="{row['광고명']}">{row['광고명']}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-      <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:6px;padding:0.35rem;text-align:center;grid-column:span 2;">
+      <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:6px;
+                  padding:0.35rem;text-align:center;grid-column:span 2;">
         <div style="font-size:0.55rem;color:#0284c7;font-weight:700;">{p_lbl}</div>
         <div style="font-size:0.88rem;font-weight:700;color:{p_clr};">{p_val}</div>
       </div>
-      {''.join(f'<div style="background:#fafaf9;border-radius:6px;padding:0.3rem;text-align:center;border:1px solid #f0f0f0;"><div style="font-size:0.55rem;color:#a1a1aa;">{m[0]}</div><div style="font-size:0.72rem;font-weight:700;color:{m[2]};">{m[1]}</div></div>' for m in sec)}
+      {''.join(f"""<div style="background:#fafaf9;border-radius:6px;padding:0.3rem;
+                  text-align:center;border:1px solid #f0f0f0;">
+        <div style="font-size:0.55rem;color:#a1a1aa;">{m[0]}</div>
+        <div style="font-size:0.72rem;font-weight:700;color:{m[2]};">{m[1]}</div>
+      </div>""" for m in sec)}
     </div>
   </div>
 </div>"""
                     st.markdown(cards_html, unsafe_allow_html=True)
-
+            # 행 사이 구분선
             if row_start + MAX_COLS < n:
-                st.markdown("<hr style='border:none;border-top:1px solid #e4e4e7;margin:1.5rem 0;'>", unsafe_allow_html=True)
+                st.markdown("<hr style='border:none;border-top:1px solid #e4e4e7;margin:1.5rem 0;'>",
+                            unsafe_allow_html=True)
 
     # ── AI 효율 분석 ───────────────────────────────────────────
     def render_ai_analysis(df_all, ai_start_str="", ai_end_str=""):
@@ -731,6 +1038,8 @@ if st.session_state.df is not None:
         )
 
         df_a = df_all.copy()
+
+        # 점수 계산: ROAS 주요, 구매당비용 보조
         max_cpp = df_a[df_a["구매당비용"] < 999999999]["구매당비용"].max() if (df_a["구매당비용"] < 999999999).any() else 1
         def score(row):
             r = row["ROAS"] * 100
@@ -744,14 +1053,23 @@ if st.session_state.df is not None:
             if row["ROAS"] >= 1.0: return "양호", "#d97706", "🟡"
             return "저조", "#dc2626", "🔴"
 
-        CPO_LIMIT = 79000
+        CPO_LIMIT = 79000  # 구매당비용 상한 (3구소켓 기준)
+
+        # 끄기 제안: 운영중 + (ROAS < 1.0 OR 구매당비용 > 상한) + 의미 있는 비용
         avg_spend = df_a["비용"].mean()
         min_spend = max(avg_spend * 0.3, 5000)
         turn_off = df_a[
             (df_a["상태"] == "ACTIVE") &
             (df_a["비용"] >= min_spend) &
-            ((df_a["ROAS"] < 1.0) | ((df_a["구매전환"] >= 1) & (df_a["구매당비용"] > CPO_LIMIT)))
+            (
+                (df_a["ROAS"] < 1.0) |
+                (
+                    (df_a["구매전환"] >= 1) &
+                    (df_a["구매당비용"] > CPO_LIMIT)
+                )
+            )
         ]
+        # 켜기 제안: 정지 상태 + ROAS >= 1.5 + 구매당비용 <= 상한 + 구매 1건 이상
         paused_mask = ~df_a["상태"].isin(["ACTIVE"])
         turn_on = df_a[
             paused_mask &
@@ -760,23 +1078,42 @@ if st.session_state.df is not None:
             (df_a["구매당비용"] <= CPO_LIMIT)
         ]
 
+        # 요약 카드
         col_a, col_b, col_c = st.columns(3)
         with col_a:
-            st.markdown(f'<div style="background:#fef2f2;border-radius:12px;padding:1rem;text-align:center;border:1px solid #fecaca;margin-bottom:1.2rem;"><div style="font-size:1.8rem;font-weight:700;color:#dc2626;">{len(turn_off)}</div><div style="font-size:0.72rem;color:#ef4444;margin-top:0.2rem;">🔴 끄기 제안</div></div>', unsafe_allow_html=True)
+            st.markdown(f"""
+<div style="background:#fef2f2;border-radius:12px;padding:1rem;
+            text-align:center;border:1px solid #fecaca;margin-bottom:1.2rem;">
+  <div style="font-size:1.8rem;font-weight:700;color:#dc2626;">{len(turn_off)}</div>
+  <div style="font-size:0.72rem;color:#ef4444;margin-top:0.2rem;">🔴 끄기 제안</div>
+</div>""", unsafe_allow_html=True)
         with col_b:
-            st.markdown(f'<div style="background:#f0fdf4;border-radius:12px;padding:1rem;text-align:center;border:1px solid #bbf7d0;margin-bottom:1.2rem;"><div style="font-size:1.8rem;font-weight:700;color:#16a34a;">{len(turn_on)}</div><div style="font-size:0.72rem;color:#16a34a;margin-top:0.2rem;">🟢 켜기 제안</div></div>', unsafe_allow_html=True)
+            st.markdown(f"""
+<div style="background:#f0fdf4;border-radius:12px;padding:1rem;
+            text-align:center;border:1px solid #bbf7d0;margin-bottom:1.2rem;">
+  <div style="font-size:1.8rem;font-weight:700;color:#16a34a;">{len(turn_on)}</div>
+  <div style="font-size:0.72rem;color:#16a34a;margin-top:0.2rem;">🟢 켜기 제안</div>
+</div>""", unsafe_allow_html=True)
         with col_c:
             others = len(df_a) - len(turn_off) - len(turn_on)
-            st.markdown(f'<div style="background:#f8fafc;border-radius:12px;padding:1rem;text-align:center;border:1px solid #e2e8f0;margin-bottom:1.2rem;"><div style="font-size:1.8rem;font-weight:700;color:#64748b;">{others}</div><div style="font-size:0.72rem;color:#94a3b8;margin-top:0.2rem;">⚪ 현상 유지</div></div>', unsafe_allow_html=True)
+            st.markdown(f"""
+<div style="background:#f8fafc;border-radius:12px;padding:1rem;
+            text-align:center;border:1px solid #e2e8f0;margin-bottom:1.2rem;">
+  <div style="font-size:1.8rem;font-weight:700;color:#64748b;">{others}</div>
+  <div style="font-size:0.72rem;color:#94a3b8;margin-top:0.2rem;">⚪ 현상 유지</div>
+</div>""", unsafe_allow_html=True)
 
         def ad_row_html(row, border_color):
             roas_pct  = f"{row['ROAS']*100:.0f}%"
             spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
             perf_lbl, perf_clr, _ = perf_info(row)
             return f"""
-<div style="background:#fff;border-radius:12px;padding:0.85rem 1rem;border:1px solid {border_color};margin-bottom:0.5rem;">
+<div style="background:#fff;border-radius:12px;padding:0.85rem 1rem;
+            border:1px solid {border_color};margin-bottom:0.5rem;">
   <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;">
-    <span style="font-size:0.85rem;font-weight:700;color:#18181b;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{row['광고명']}</span>
+    <span style="font-size:0.85rem;font-weight:700;color:#18181b;
+                 flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;
+                 white-space:nowrap;">{row['광고명']}</span>
     <span style="font-size:0.65rem;color:#a1a1aa;flex-shrink:0;">{row['광고세트']}</span>
   </div>
   <div style="display:flex;gap:1.2rem;flex-wrap:wrap;">
@@ -787,21 +1124,60 @@ if st.session_state.df is not None:
   </div>
 </div>"""
 
+        # 끄기 제안 섹션
         if len(turn_off) > 0:
             st.markdown(f'<p class="section-title">🔴 끄기 제안 — {len(turn_off)}개 소재</p>', unsafe_allow_html=True)
             st.markdown('<p class="section-sub">운영 중이지만 ROAS가 낮거나 구매당비용이 79,000원을 초과하는 소재입니다.</p>', unsafe_allow_html=True)
             for _, row in turn_off.iterrows():
-                st.markdown(ad_row_html(row, "#fecaca"), unsafe_allow_html=True)
+                col_card, col_btn = st.columns([6, 1])
+                with col_card:
+                    st.markdown(ad_row_html(row, "#fecaca"), unsafe_allow_html=True)
+                with col_btn:
+                    st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
+                    ad_id = str(row.get("ad_id", ""))
+                    if ad_id and st.button("⏸ 끄기", key=f"off_{ad_id}",
+                                           type="primary", use_container_width=True):
+                        res = toggle_ad_status(ad_id, "PAUSED")
+                        if res is True:
+                            for _df_key in ("df_ai", "df"):
+                                if _df_key in st.session_state:
+                                    _tmp = st.session_state[_df_key].copy()
+                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
+                                    st.session_state[_df_key] = _tmp
+                            st.rerun()
+                        else:
+                            st.error(f"오류: {res}")
+                    st.markdown("</div>", unsafe_allow_html=True)
 
+        # 켜기 제안 섹션
         if len(turn_on) > 0:
             st.markdown(f'<p class="section-title" style="margin-top:1.2rem;">🟢 켜기 제안 — {len(turn_on)}개 소재</p>', unsafe_allow_html=True)
             st.markdown('<p class="section-sub">정지 상태지만 ROAS 150% 이상 + 구매당비용 79,000원 이하로 성과가 검증된 소재입니다.</p>', unsafe_allow_html=True)
             for _, row in turn_on.iterrows():
-                st.markdown(ad_row_html(row, "#bbf7d0"), unsafe_allow_html=True)
+                col_card, col_btn = st.columns([6, 1])
+                with col_card:
+                    st.markdown(ad_row_html(row, "#bbf7d0"), unsafe_allow_html=True)
+                with col_btn:
+                    st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
+                    ad_id = str(row.get("ad_id", ""))
+                    if ad_id and st.button("▶ 켜기", key=f"on_{ad_id}",
+                                           use_container_width=True):
+                        res = toggle_ad_status(ad_id, "ACTIVE")
+                        if res is True:
+                            for _df_key in ("df_ai", "df"):
+                                if _df_key in st.session_state:
+                                    _tmp = st.session_state[_df_key].copy()
+                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
+                                    st.session_state[_df_key] = _tmp
+                            st.rerun()
+                        else:
+                            st.error(f"오류: {res}")
+                    st.markdown("</div>", unsafe_allow_html=True)
 
         if len(turn_off) == 0 and len(turn_on) == 0:
             st.success("✅ 현재 모든 소재가 최적 상태입니다! 특별한 조치가 필요하지 않아요.")
 
+        # 전체 순위 테이블
         st.markdown('<p class="section-title" style="margin-top:1.8rem;">📋 전체 소재 효율 순위</p>', unsafe_allow_html=True)
         st.markdown('<p class="section-sub">ROAS · 구매당비용 기준 종합 점수순 정렬 (OFF 소재 포함)</p>', unsafe_allow_html=True)
         for rank_i, (_, row) in enumerate(df_a.iterrows()):
@@ -810,11 +1186,14 @@ if st.session_state.df is not None:
             spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
             status_ico = "🟢 운영중" if row["상태"] == "ACTIVE" else "⏸ 정지"
             st.markdown(f"""
-<div style="background:#fff;border-radius:10px;padding:0.65rem 1rem;border:1px solid #f0f0f0;border-left:4px solid {perf_clr};margin-bottom:0.35rem;display:flex;align-items:center;gap:0.8rem;">
+<div style="background:#fff;border-radius:10px;padding:0.65rem 1rem;
+            border:1px solid #f0f0f0;border-left:4px solid {perf_clr};
+            margin-bottom:0.35rem;display:flex;align-items:center;gap:0.8rem;">
   <span style="font-size:0.78rem;font-weight:700;color:#a1a1aa;min-width:22px;">#{rank_i+1}</span>
   <span style="font-size:0.9rem;">{perf_emoji}</span>
   <div style="flex:1;min-width:0;">
-    <div style="font-size:0.82rem;font-weight:700;color:#18181b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row['광고명']}</div>
+    <div style="font-size:0.82rem;font-weight:700;color:#18181b;
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row['광고명']}</div>
     <div style="font-size:0.65rem;color:#a1a1aa;">{status_ico} · {row['광고세트']}</div>
   </div>
   <div style="display:flex;gap:1.2rem;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
@@ -824,7 +1203,7 @@ if st.session_state.df is not None:
   </div>
 </div>""", unsafe_allow_html=True)
 
-    # ── 네비게이션 ─────────────────────────────────────────────
+    # ── 네비게이션 (세션 스테이트로 탭 유지) ─────────────────────
     if "active_tab" not in st.session_state:
         st.session_state.active_tab = "summary"
 
@@ -837,11 +1216,18 @@ if st.session_state.df is not None:
     for col, (key, label) in zip(nav_cols, nav_items.items()):
         with col:
             is_active = (st.session_state.active_tab == key)
-            if st.button(label, key=f"nav_{key}", type="primary" if is_active else "secondary", use_container_width=True):
+            if st.button(
+                label,
+                key=f"nav_{key}",
+                type="primary" if is_active else "secondary",
+                use_container_width=True,
+            ):
                 st.session_state.active_tab = key
 
-    st.markdown("<div style='margin-top:1rem;border-top:1px solid #e4e4e7;padding-top:1.2rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:1rem;border-top:1px solid #e4e4e7;padding-top:1.2rem;'></div>",
+                unsafe_allow_html=True)
 
+    # ── 컨텐츠 렌더링 ─────────────────────────────────────────
     if st.session_state.active_tab == "summary":
         render_summary(df)
 
@@ -855,29 +1241,49 @@ if st.session_state.df is not None:
         if "list_sort" not in st.session_state:
             st.session_state.list_sort = "📈 ROAS"
 
+        # ── 캠페인 필터 ──────────────────────────────────────────
         campaign_list = sorted(df["캠페인"].dropna().unique().tolist())
         if "selected_campaign" not in st.session_state or st.session_state.selected_campaign not in campaign_list:
             st.session_state.selected_campaign = campaign_list[0] if campaign_list else None
 
         if len(campaign_list) > 1:
-            st.markdown('<p style="font-size:0.72rem;color:#a1a1aa;margin:0 0 0.3rem 0;">캠페인 선택</p>', unsafe_allow_html=True)
+            st.markdown(
+                '<p style="font-size:0.72rem;color:#a1a1aa;margin:0 0 0.3rem 0;">캠페인 선택</p>',
+                unsafe_allow_html=True
+            )
             camp_cols = st.columns(len(campaign_list))
             for i, camp in enumerate(campaign_list):
                 with camp_cols[i]:
                     is_sel = (st.session_state.selected_campaign == camp)
+                    # 짧게 표시 (앞 15자)
                     short_name = camp[:15] + "…" if len(camp) > 15 else camp
-                    if st.button(short_name, key=f"camp_btn_{i}", type="primary" if is_sel else "secondary", use_container_width=True, help=camp):
+                    if st.button(
+                        short_name,
+                        key=f"camp_btn_{i}",
+                        type="primary" if is_sel else "secondary",
+                        use_container_width=True,
+                        help=camp,
+                    ):
                         st.session_state.selected_campaign = camp
             st.markdown("<div style='margin-bottom:0.5rem;'></div>", unsafe_allow_html=True)
 
+        # 선택된 캠페인으로 필터링
         df_filtered = df[df["캠페인"] == st.session_state.selected_campaign] if st.session_state.selected_campaign else df
 
-        st.markdown('<p style="font-size:0.72rem;color:#a1a1aa;margin:0 0 0.4rem 0;">세트 내 소재 정렬 기준</p>', unsafe_allow_html=True)
+        st.markdown(
+            '<p style="font-size:0.72rem;color:#a1a1aa;margin:0 0 0.4rem 0;">세트 내 소재 정렬 기준</p>',
+            unsafe_allow_html=True
+        )
         sort_cols = st.columns(len(sort_options))
         for i, label in enumerate(sort_options):
             with sort_cols[i]:
                 is_active = (st.session_state.list_sort == label)
-                if st.button(label, key=f"sort_btn_{label}", type="primary" if is_active else "secondary", use_container_width=True):
+                if st.button(
+                    label,
+                    key=f"sort_btn_{label}",
+                    type="primary" if is_active else "secondary",
+                    use_container_width=True,
+                ):
                     st.session_state.list_sort = label
 
         st.markdown("<div style='margin-bottom:1rem;'></div>", unsafe_allow_html=True)
@@ -885,11 +1291,13 @@ if st.session_state.df is not None:
         render_adset_horizontal(df_filtered, col_key, asc, sort_label)
 
     elif st.session_state.active_tab == "ai":
+        # AI 분석은 항상 최근 28일 데이터 사용
         ai_end   = date.today()
-        ai_start = ai_end - timedelta(days=27)
+        ai_start = ai_end - timedelta(days=27)  # 오늘 포함 28일
         ai_start_str = str(ai_start)
         ai_end_str   = str(ai_end)
 
+        # 날짜가 바뀌면 캐시 무효화
         if st.session_state.get("ai_date_range") != (ai_start_str, ai_end_str):
             st.session_state.pop("df_ai", None)
             st.session_state.ai_date_range = (ai_start_str, ai_end_str)
@@ -897,7 +1305,10 @@ if st.session_state.df is not None:
         if "df_ai" not in st.session_state:
             with st.spinner("AI 분석용 데이터 조회 중 (최근 28일)..."):
                 try:
-                    ai_rows = fetch_ad_data(ai_start_str, ai_end_str, ACCESS_TOKEN, AD_ACCOUNT_ID, APP_ID, APP_SECRET)
+                    ai_rows = fetch_ad_data(
+                        ai_start_str, ai_end_str,
+                        ACCESS_TOKEN, AD_ACCOUNT_ID, APP_ID, APP_SECRET
+                    )
                     st.session_state.df_ai = pd.DataFrame(ai_rows)
                 except Exception as e:
                     st.error(f"AI 분석 데이터 오류: {e}")
