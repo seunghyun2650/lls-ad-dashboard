@@ -1119,11 +1119,16 @@ if st.session_state.df is not None:
                 )
             )
         ]
-
+        # 켜기 제안: 정지 상태 + ROAS >= 1.5 + 구매당비용 <= 상한 + 구매 1건 이상
+        paused_mask = ~df_a["상태"].isin(["ACTIVE"])
+        turn_on = df_a[
+            paused_mask &
+            (df_a["ROAS"] >= 1.5) &
+            (df_a["구매전환"] >= 1) &
+            (df_a["구매당비용"] <= CPO_LIMIT)
+        ]
 
         # 요약 카드
-        paused_cnt_ai = len(df_a[~df_a["상태"].isin(["ACTIVE"])])
-        others = len(df_a) - len(turn_off) - paused_cnt_ai
         col_a, col_b, col_c = st.columns(3)
         with col_a:
             st.markdown(f"""
@@ -1134,72 +1139,40 @@ if st.session_state.df is not None:
 </div>""", unsafe_allow_html=True)
         with col_b:
             st.markdown(f"""
-<div style="background:#f8fafc;border-radius:12px;padding:1rem;
-            text-align:center;border:1px solid #e2e8f0;margin-bottom:1.2rem;">
-  <div style="font-size:1.8rem;font-weight:700;color:#64748b;">{paused_cnt_ai}</div>
-  <div style="font-size:0.72rem;color:#94a3b8;margin-top:0.2rem;">⏸ 정지된 소재</div>
-</div>""", unsafe_allow_html=True)
-        with col_c:
-            st.markdown(f"""
 <div style="background:#f0fdf4;border-radius:12px;padding:1rem;
             text-align:center;border:1px solid #bbf7d0;margin-bottom:1.2rem;">
-  <div style="font-size:1.8rem;font-weight:700;color:#16a34a;">{others}</div>
-  <div style="font-size:0.72rem;color:#16a34a;margin-top:0.2rem;">⚪ 현상 유지</div>
+  <div style="font-size:1.8rem;font-weight:700;color:#16a34a;">{len(turn_on)}</div>
+  <div style="font-size:0.72rem;color:#16a34a;margin-top:0.2rem;">🟢 켜기 제안</div>
+</div>""", unsafe_allow_html=True)
+        with col_c:
+            others = len(df_a) - len(turn_off) - len(turn_on)
+            st.markdown(f"""
+<div style="background:#f8fafc;border-radius:12px;padding:1rem;
+            text-align:center;border:1px solid #e2e8f0;margin-bottom:1.2rem;">
+  <div style="font-size:1.8rem;font-weight:700;color:#64748b;">{others}</div>
+  <div style="font-size:0.72rem;color:#94a3b8;margin-top:0.2rem;">⚪ 현상 유지</div>
 </div>""", unsafe_allow_html=True)
 
         def ad_row_html(row, border_color):
             roas_pct  = f"{row['ROAS']*100:.0f}%"
             spend_per = "∞" if row["구매당비용"] == 999999999 else f"{row['구매당비용']:,.0f}원"
             perf_lbl, perf_clr, _ = perf_info(row)
-
-            # 썸네일 + 링크 생성
-            yt_id = get_youtube_id(row["광고명"])
-            ig_url = row.get("instagram_url", "")
-            thumb_url = row.get("썸네일", "")
-
-            if yt_id:
-                thumb_src = f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg"
-                link_url  = f"https://www.youtube.com/shorts/{yt_id}"
-            elif thumb_url:
-                thumb_src = thumb_url
-                link_url  = ig_url if ig_url else "#"
-            else:
-                thumb_src = ""
-                link_url  = ig_url if ig_url else "#"
-
-            if thumb_src:
-                thumb_html = f'''<a href="{link_url}" target="_blank" style="flex-shrink:0;">
-  <img src="{thumb_src}"
-       style="width:52px;height:52px;object-fit:cover;border-radius:8px;
-              border:1px solid #e4e4e7;display:block;" />
-</a>'''
-            else:
-                thumb_html = f'''<a href="{link_url}" target="_blank"
-   style="flex-shrink:0;width:52px;height:52px;border-radius:8px;
-          background:#f4f4f5;border:1px solid #e4e4e7;display:flex;
-          align-items:center;justify-content:center;font-size:1.1rem;
-          text-decoration:none;">🎬</a>'''
-
             return f"""
 <div style="background:#fff;border-radius:12px;padding:0.85rem 1rem;
-            border:1px solid {border_color};margin-bottom:0.5rem;
-            display:flex;align-items:center;gap:0.85rem;">
-  {thumb_html}
-  <div style="flex:1;min-width:0;">
-    <div style="margin-bottom:0.4rem;">
-      <span style="font-size:0.85rem;font-weight:700;color:#18181b;">{row['광고명']}</span>
-      <div style="margin-top:0.2rem;">
-        <span style="display:inline-block;font-size:0.68rem;font-weight:600;
-                     color:#0284c7;background:#e0f2fe;border-radius:4px;
-                     padding:1px 7px;">📁 {row['광고세트']}</span>
-      </div>
+            border:1px solid {border_color};margin-bottom:0.5rem;">
+  <div style="margin-bottom:0.4rem;">
+    <span style="font-size:0.85rem;font-weight:700;color:#18181b;">{row['광고명']}</span>
+    <div style="margin-top:0.2rem;">
+      <span style="display:inline-block;font-size:0.68rem;font-weight:600;
+                   color:#0284c7;background:#e0f2fe;border-radius:4px;
+                   padding:1px 7px;">📁 {row['광고세트']}</span>
     </div>
-    <div style="display:flex;gap:1.2rem;flex-wrap:wrap;">
-      <span style="font-size:0.75rem;">ROAS <strong style="color:{perf_clr};">{roas_pct}</strong></span>
-      <span style="font-size:0.75rem;">광고비 <strong>{row['비용']:,.0f}원</strong></span>
-      <span style="font-size:0.75rem;">구매당비용 <strong>{spend_per}</strong></span>
-      <span style="font-size:0.75rem;">구매수 <strong>{int(row['구매전환'])}건</strong></span>
-    </div>
+  </div>
+  <div style="display:flex;gap:1.2rem;flex-wrap:wrap;">
+    <span style="font-size:0.75rem;">ROAS <strong style="color:{perf_clr};">{roas_pct}</strong></span>
+    <span style="font-size:0.75rem;">광고비 <strong>{row['비용']:,.0f}원</strong></span>
+    <span style="font-size:0.75rem;">구매당비용 <strong>{spend_per}</strong></span>
+    <span style="font-size:0.75rem;">구매수 <strong>{int(row['구매전환'])}건</strong></span>
   </div>
 </div>"""
 
@@ -1208,101 +1181,53 @@ if st.session_state.df is not None:
             st.markdown(f'<p class="section-title">🔴 끄기 제안 — {len(turn_off)}개 소재</p>', unsafe_allow_html=True)
             st.markdown('<p class="section-sub">운영 중이지만 ROAS가 낮거나 구매당비용이 79,000원을 초과하는 소재입니다.</p>', unsafe_allow_html=True)
             for _, row in turn_off.iterrows():
-                ad_id = str(row.get("ad_id", ""))
-                # 세션에서 현재 상태 가져오기 (버튼 누른 후 즉시 반영)
-                current_status = row.get("상태", "ACTIVE")
-                for _df_key in ("df_ai", "df"):
-                    if _df_key in st.session_state:
-                        _match = st.session_state[_df_key][st.session_state[_df_key]["ad_id"] == ad_id]
-                        if not _match.empty:
-                            current_status = _match.iloc[0]["상태"]
-                            break
-
                 col_card, col_btn = st.columns([6, 1])
                 with col_card:
-                    border = "#fecaca" if current_status == "ACTIVE" else "#bbf7d0"
-                    st.markdown(ad_row_html(row, border), unsafe_allow_html=True)
+                    st.markdown(ad_row_html(row, "#fecaca"), unsafe_allow_html=True)
                 with col_btn:
                     st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
-                    if ad_id:
-                        if current_status == "ACTIVE":
-                            if st.button("OFF", key=f"off_{ad_id}",
-                                         type="primary", use_container_width=True):
-                                res = toggle_ad_status(ad_id, "PAUSED")
-                                if res is True:
-                                    for _df_key in ("df_ai", "df"):
-                                        if _df_key in st.session_state:
-                                            _tmp = st.session_state[_df_key].copy()
-                                            _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
-                                            st.session_state[_df_key] = _tmp
-                                    st.rerun()
-                                else:
-                                    st.error(f"오류: {res}")
+                    ad_id = str(row.get("ad_id", ""))
+                    if ad_id and st.button("⏸ 끄기", key=f"off_{ad_id}",
+                                           type="primary", use_container_width=True):
+                        res = toggle_ad_status(ad_id, "PAUSED")
+                        if res is True:
+                            for _df_key in ("df_ai", "df"):
+                                if _df_key in st.session_state:
+                                    _tmp = st.session_state[_df_key].copy()
+                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
+                                    st.session_state[_df_key] = _tmp
+                            st.rerun()
                         else:
-                            if st.button("ON", key=f"on_from_off_{ad_id}",
-                                         use_container_width=True):
-                                res = toggle_ad_status(ad_id, "ACTIVE")
-                                if res is True:
-                                    for _df_key in ("df_ai", "df"):
-                                        if _df_key in st.session_state:
-                                            _tmp = st.session_state[_df_key].copy()
-                                            _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
-                                            st.session_state[_df_key] = _tmp
-                                    st.rerun()
-                                else:
-                                    st.error(f"오류: {res}")
+                            st.error(f"오류: {res}")
                     st.markdown("</div>", unsafe_allow_html=True)
 
-        # 정지된 소재 전체 목록 (AI 조건 없이 PAUSED 상태 전부 표시)
-        paused_all = df_a[~df_a["상태"].isin(["ACTIVE"])].copy()
-        if len(paused_all) > 0:
-            st.markdown(f'<p class="section-title" style="margin-top:1.2rem;">⏸ 정지된 소재 — {len(paused_all)}개</p>', unsafe_allow_html=True)
-            st.markdown('<p class="section-sub">현재 정지 상태인 소재 전체 목록입니다. ON 버튼으로 바로 켤 수 있어요.</p>', unsafe_allow_html=True)
-            for _, row in paused_all.iterrows():
-                ad_id = str(row.get("ad_id", ""))
-                current_status = row.get("상태", "PAUSED")
-                for _df_key in ("df_ai", "df"):
-                    if _df_key in st.session_state:
-                        _match = st.session_state[_df_key][st.session_state[_df_key]["ad_id"] == ad_id]
-                        if not _match.empty:
-                            current_status = _match.iloc[0]["상태"]
-                            break
-
+        # 켜기 제안 섹션
+        if len(turn_on) > 0:
+            st.markdown(f'<p class="section-title" style="margin-top:1.2rem;">🟢 켜기 제안 — {len(turn_on)}개 소재</p>', unsafe_allow_html=True)
+            st.markdown('<p class="section-sub">정지 상태지만 ROAS 150% 이상 + 구매당비용 79,000원 이하로 성과가 검증된 소재입니다.</p>', unsafe_allow_html=True)
+            for _, row in turn_on.iterrows():
                 col_card, col_btn = st.columns([6, 1])
                 with col_card:
-                    border = "#bbf7d0" if current_status == "ACTIVE" else "#e4e4e7"
-                    st.markdown(ad_row_html(row, border), unsafe_allow_html=True)
+                    st.markdown(ad_row_html(row, "#bbf7d0"), unsafe_allow_html=True)
                 with col_btn:
                     st.markdown("<div style='padding-top:0.35rem;'>", unsafe_allow_html=True)
-                    if ad_id:
-                        if current_status != "ACTIVE":
-                            if st.button("ON", key=f"on_{ad_id}", use_container_width=True):
-                                res = toggle_ad_status(ad_id, "ACTIVE")
-                                if res is True:
-                                    for _df_key in ("df_ai", "df"):
-                                        if _df_key in st.session_state:
-                                            _tmp = st.session_state[_df_key].copy()
-                                            _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
-                                            st.session_state[_df_key] = _tmp
-                                    st.rerun()
-                                else:
-                                    st.error(f"오류: {res}")
+                    ad_id = str(row.get("ad_id", ""))
+                    if ad_id and st.button("▶ 켜기", key=f"on_{ad_id}",
+                                           use_container_width=True):
+                        res = toggle_ad_status(ad_id, "ACTIVE")
+                        if res is True:
+                            for _df_key in ("df_ai", "df"):
+                                if _df_key in st.session_state:
+                                    _tmp = st.session_state[_df_key].copy()
+                                    _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "ACTIVE"
+                                    st.session_state[_df_key] = _tmp
+                            st.rerun()
                         else:
-                            if st.button("OFF", key=f"off_from_paused_{ad_id}", type="primary", use_container_width=True):
-                                res = toggle_ad_status(ad_id, "PAUSED")
-                                if res is True:
-                                    for _df_key in ("df_ai", "df"):
-                                        if _df_key in st.session_state:
-                                            _tmp = st.session_state[_df_key].copy()
-                                            _tmp.loc[_tmp["ad_id"] == ad_id, "상태"] = "PAUSED"
-                                            st.session_state[_df_key] = _tmp
-                                    st.rerun()
-                                else:
-                                    st.error(f"오류: {res}")
+                            st.error(f"오류: {res}")
                     st.markdown("</div>", unsafe_allow_html=True)
 
-        if len(turn_off) == 0 and len(paused_all) == 0:
-            st.success("✅ 현재 모든 소재가 운영 중이고 효율도 양호합니다!")
+        if len(turn_off) == 0 and len(turn_on) == 0:
+            st.success("✅ 현재 모든 소재가 최적 상태입니다! 특별한 조치가 필요하지 않아요.")
 
         # 전체 순위 테이블
         st.markdown('<p class="section-title" style="margin-top:1.8rem;">📋 전체 소재 효율 순위</p>', unsafe_allow_html=True)
