@@ -449,6 +449,7 @@ if fetch_btn:
 if st.session_state.df is not None:
     df = st.session_state.df
     df = df[~df["상태"].str.upper().str.contains("DELETE", na=False)].copy()
+    df = df[df["상태"] != "알 수 없음"].copy()
 
     if df.empty or "비용" not in df.columns:
         st.info("📊 조회 버튼을 눌러 광고 데이터를 불러오세요.")
@@ -706,7 +707,9 @@ div[data-testid="stVerticalBlock"]:has(.tbl-r) .stButton button {
 
         # ── 정렬 ──────────────────────────────────────────────
         col_key = SORT_MAP[st.session_state.tbl_sort][0]
-        df_sorted = df_all.sort_values(col_key, ascending=st.session_state.tbl_asc).reset_index(drop=True)
+        tmp = df_all.copy()
+        tmp["_active"] = (tmp["상태"] == "ACTIVE").astype(int)
+        df_sorted = tmp.sort_values(["_active", col_key], ascending=[False, st.session_state.tbl_asc]).drop(columns=["_active"]).reset_index(drop=True)
 
         # ── 데이터 행 (container로 CSS 스코프 지정) ───────────
         with st.container():
